@@ -1,0 +1,112 @@
+
++ Inline testing framework
+
++ Core
+    + Query with stream output
+    + Multiple Queries with stream output
+    + JavaScript parameters handling: if-else dynamic sql and basic binding types: string, numeric, date
+    + javaScript RS mapper/handler
+    + Buffered query
+        + result as parameter (sequence.nextval)
+        + custom JavaScript output
+    + update counts, addBatch, executeBatch
+    + code reuse / functions;
+    + dynamic parameter name
+    + include static
+
+
+    + non-alpha first letters excluded from service definition
+    + store *.js.sql in WEB-INF/ as alternative to classpath
+    - ":" escaping in template files
+
++ Nashorn Backport to Java 7
+
++ Security
+    + CSRF
+        + Token recovery
+
++ Web API
+    + Rest
+    + JsApi
+        + error handling
+    + Script definition/CSRF no caching
+
+
++ Advanced
+    + Blob/Clob
+    + Oracle custom types support : struct, numeric array, string array, struct array
+    + JSON type support
+    + postgres arrays support
+
++ Excel Reporting
+
++ In-browser debug mode
+    + Collection types support by Java-JS proxy
+    + Cookie path to adjust
+
++ In-browser unit test execution
+
++ Stored Procedures
+    + Stored procedures support with output types
+    + Multiple Queries from one SP
+
+
++ In-Java / DAO component
+    + Simple object trees support
+    + Children list support
+    + unit test
+
+
++ Hints
+    + Progressive loading
+    T AntiXSS escaping
+    T server-side redirect handling
+    T server-side error handling
+
+
++ Integration plugins
+    + session/request attributes objects
+        // webapp.*
+    DocOnly Spring integration
+            // AppContext lookup
+    DocOnly JEE integration
+            //  (BeanManager) ic.lookup("java:comp/BeanManager")
+
+
+
++ JUnit from jars
+
+- Config demo
+    - debug mode
+    - DataSources
+    - Direct connections
+    - Multiple connections
+    - Dynamic DataSource
+    - Transactions
+        - Manual
+        - JTA
+        - setReadOnly for get*
+    - on errror handler
+    - date/time format
+
+
+Extra demo
+    - root package definition in servlet config
+    - hierarchical config.js
+    - config.js.sql
+    - .postprocess.js, .js.sql, .js
+    - GET/POST/PUT/DETELE postfix for REST requests
+    - if with/without {}
+    - scripted append with $SQL+="";
+    - batch insert from select
+    - UTF-8 support
+
+
+
+
+todo:
+
+    - spring integration - auto JS-Java mapping on server-side javasctipt method call level
+    - Auto - API definition
+    - API  - Input parameter protection
+    - Auto - Non-regression
