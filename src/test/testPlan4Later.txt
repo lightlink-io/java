@@ -1,0 +1,45 @@
+Later releases:
+
+- Stop Running Queries
+    - js function todo
+
+- Advanced
+  - File upload
+  - File download
+
+- Core:
+    L XML type support
+    - call dynamic
+    - queryForValue
+    - generatedKeys support
+
+
+- Hints
+    T Auto detect dropped client
+
+
+- Overload Protection (later)
+    - JS
+    - Server side
+
+- Automated container web testing
+
+-    White list input parameters
+
+
+
+- Enterprise features
+    - Overload Protection (later)
+        - JS
+        - Server side
+    - Caching with disk overflow
+    - Clustering support
+    - Monitoring/
+
+
+- Studio features
+    - SP queries generation
+    - debug spy
+    - test cases automatic recording
+    - recording of data for injection and assertion
+    - test execution
