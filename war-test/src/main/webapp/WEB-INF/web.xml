@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+         version="2.4">
+
+    <display-name>JAX RS Application</display-name>
+
+    <context-param>
+        <param-name>lightlink.root</param-name>
+        <param-value>demo.js</param-value>
+    </context-param>
+
+    <servlet>
+        <servlet-name>restServlet</servlet-name>
+        <servlet-class>io.lightlink.servlet.RestServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>JsProxyServlet</servlet-name>
+        <servlet-class>io.lightlink.servlet.JsProxyServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>jsApiDefinitionServlet</servlet-name>
+        <servlet-class>io.lightlink.servlet.JsMethodsDefinitionServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DebugApiDefinitionServlet</servlet-name>
+        <servlet-class>io.lightlink.servlet.debug.DebugMethodsDefinitionServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>DebugFacadesProxyServlet</servlet-name>
+        <servlet-class>io.lightlink.servlet.debug.DebugFacadesProxyServlet</servlet-class>
+    </servlet>
+
+
+    <servlet-mapping><servlet-name>restServlet</servlet-name><url-pattern>/rest/*</url-pattern></servlet-mapping>
+    <servlet-mapping><servlet-name>JsProxyServlet</servlet-name><url-pattern>/lightlink/*</url-pattern></servlet-mapping>
+    <servlet-mapping><servlet-name>jsApiDefinitionServlet</servlet-name><url-pattern>/lightlink-api/jsapi.js</url-pattern></servlet-mapping>
+    <servlet-mapping><servlet-name>DebugApiDefinitionServlet</servlet-name><url-pattern>/lightlink-debug-src/*</url-pattern></servlet-mapping>
+    <servlet-mapping><servlet-name>DebugFacadesProxyServlet</servlet-name><url-pattern>/lightlink-debug-proxy/*</url-pattern></servlet-mapping>
+
+    <servlet>
+        <servlet-name>JsProxyServlet-UnitTest</servlet-name>
+        <servlet-class>io.lightlink.servlet.JsProxyServlet</servlet-class>
+        <init-param><param-name>lightlink.root</param-name><param-value>lightlink</param-value></init-param>
+    </servlet>
+    <servlet>
+        <servlet-name>jsApiDefinitionServlet-UnitTest</servlet-name>
+        <servlet-class>io.lightlink.servlet.JsMethodsDefinitionServlet</servlet-class>
+        <init-param><param-name>lightlink.root</param-name><param-value>lightlink</param-value></init-param>
+    </servlet>
+    <servlet>
+        <servlet-name>DebugApiDefinitionServlet-UnitTest</servlet-name>
+        <servlet-class>io.lightlink.servlet.debug.DebugMethodsDefinitionServlet</servlet-class>
+        <init-param><param-name>lightlink.root</param-name><param-value>lightlink</param-value></init-param>
+    </servlet>
+
+    <servlet-mapping><servlet-name>JsProxyServlet-UnitTest</servlet-name><url-pattern>/lightUnit/*</url-pattern></servlet-mapping>
+    <servlet-mapping><servlet-name>jsApiDefinitionServlet-UnitTest</servlet-name><url-pattern>/lightUnit-api/jsapi.js</url-pattern></servlet-mapping>
+    <servlet-mapping><servlet-name>DebugApiDefinitionServlet-UnitTest</servlet-name><url-pattern>/lightUnit-debug-src/*</url-pattern></servlet-mapping>
+    <servlet-mapping><servlet-name>DebugFacadesProxyServlet</servlet-name><url-pattern>/lightUnit-debug-proxy/*</url-pattern></servlet-mapping>
+
+</web-app>

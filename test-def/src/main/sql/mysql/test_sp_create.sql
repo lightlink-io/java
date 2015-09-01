@@ -1,0 +1,23 @@
+drop PROCEDURE TEST_SIMPLE_SP
+go
+CREATE PROCEDURE TEST_SIMPLE_SP (
+
+ INOUT  DATE_IN_OUT DATE,
+ INOUT INT_IN_OUT INT,
+ IN STRING_IN VARCHAR(32),
+ OUT STRING_OUT VARCHAR(32)
+ )
+BEGIN
+
+    select DATE_ADD(DATE_IN_OUT, INTERVAL 1 DAY) into DATE_IN_OUT;
+    select INT_IN_OUT +1 into INT_IN_OUT;
+
+    select concat('Hello ',STRING_IN) into STRING_OUT;
+
+    SELECT 'Hello World';
+
+    SELECT 'Hello One More World';
+
+END
+
+
