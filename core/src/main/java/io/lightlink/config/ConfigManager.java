@@ -1,9 +1,33 @@
 package io.lightlink.config;
 
+/*
+ * #%L
+ * lightlink-core
+ * %%
+ * Copyright (C) 2015 Vitaliy Shevchuk
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
+
+
 import io.lightlink.translator.ScriptTranslator;
 import io.lightlink.utils.Utils;
-import org.apache.commons.lang.StringUtils;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,6 +61,16 @@ public class ConfigManager {
         this.servletContext = servletContext;
     }
 
+    public static ScriptEngine getScriptEngine() {
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("nashorn");
+        if (engine==null){
+            throw new IllegalStateException("Nashorn engine is not found. Please make sure you use Java 8 or higher OR " +
+                    "to run on Java7 you need to add Nashorn backport jar to your webapp");
+        }
+        return engine;
+    }
+
     public String getRootPackage() {
         return rootPackage;
     }
@@ -49,7 +83,7 @@ public class ConfigManager {
     public List<Script> getConfigAndContent(String actionName, String method) {
         ArrayList<Script> res = new ArrayList<Script>();
 
-        boolean methodPresent = StringUtils.isNotBlank(method);
+        boolean methodPresent = !Utils.isBlank(method);
 
         int pos = 0;
         do {
@@ -102,7 +136,7 @@ public class ConfigManager {
         return res;
     }
 
-    private Script getScript(String scriptName, boolean translationNeeded) {
+    public Script getScript(String scriptName, boolean translationNeeded) {
 
         scriptName = scriptName.replace('\\', '/');
 
@@ -127,27 +161,15 @@ public class ConfigManager {
 
     private String getScriptContent(URL url, String scriptName, boolean translationNeeded) throws IOException {
         String content;
-        if (!isInDebugMode()) {
 
-            InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(getRootPackage() + "/" + scriptName); //cached by classloader
-            content = Utils.streamToString(stream);
-            stream.close();
+        InputStream stream = url.openStream();
+        content = Utils.streamToString(stream);
+        stream.close();
 
-            content = processInclude(scriptName, content, translationNeeded);
+        content = processInclude(scriptName, content, translationNeeded);
+        if (translationNeeded)
+            content = translator.translate(scriptName, url, content);
 
-            if (translationNeeded)
-                content = translator.translate(scriptName, url, content);
-        } else {
-            // debug mode
-
-            InputStream stream = url.openStream();
-            content = Utils.streamToString(stream);
-            stream.close();
-
-            content = processInclude(scriptName, content, translationNeeded);
-            if (translationNeeded)
-                content = translator.translate(scriptName, url, content);
-        }
         return content;
     }
 
@@ -168,7 +190,7 @@ public class ConfigManager {
                 if (prefixedByComment(pos, sb)) {
                     int keyLength = key.length() + 2;
                     pos = pos - 2;
-                    boolean inclAsTemplate = sb.charAt(pos)=='-';
+                    boolean inclAsTemplate = sb.charAt(pos) == '-';
                     for (int pos2 = pos + keyLength; pos2 < sb.length(); pos2++) {
                         char c = sb.charAt(pos2);
                         if (Character.isWhitespace(c) || pos2 == sb.length() - 1) {
@@ -192,17 +214,17 @@ public class ConfigManager {
                                 throw new IllegalArgumentException("Cannot include '" + resource + "' from '" + scriptName + "' File:'" + path + "' not found");
 
 
-                            String prefix="", postfix="";
+                            String prefix = "", postfix = "";
 
-                            if (path.endsWith(".js.sql") && !inclAsTemplate){
-                                prefix="\n%>";
-                                postfix="\n<%";
-                            } else if (!path.endsWith(".js.sql") && inclAsTemplate){
-                                prefix="\n<%";
-                                postfix="\n%>";
+                            if (path.endsWith(".js.sql") && !inclAsTemplate) {
+                                prefix = "\n%>";
+                                postfix = "\n<%";
+                            } else if (!path.endsWith(".js.sql") && inclAsTemplate) {
+                                prefix = "\n<%";
+                                postfix = "\n%>";
                             }
 
-                            sb.insert(pos, prefix+script.getContent()+postfix);
+                            sb.insert(pos, prefix + script.getContent() + postfix);
 
                             break;
 

@@ -1,5 +1,29 @@
 package io.lightlink.core;
 
+/*
+ * #%L
+ * lightlink-core
+ * %%
+ * Copyright (C) 2015 Vitaliy Shevchuk
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
+
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -21,47 +45,34 @@ public class Hints {
         return progressive;
     }
 
-    public static Hints fromParams(Map<String, Object> params) {
+    public static Hints fromRequest(HttpServletRequest servletRequest) {
         Hints hints = new Hints();
-        Object progressiveObj = params.get("!progressive");
+        String progressive = servletRequest.getHeader("lightlink-progressive");
 
-        if (progressiveObj != null) {
-
-            if (progressiveObj instanceof Boolean && (Boolean) progressiveObj) {
-                hints.progressive = new int[]{100, 1000, 10000};
-
-            } else if (progressiveObj instanceof Number) {
-                hints.progressive = new int[]{((Number) progressiveObj).intValue()};
-
-            } else if (progressiveObj instanceof List) {
-                List progressiveList = (List) progressiveObj;
-                hints.progressive = new int[progressiveList.size()];
-                for (int i = 0; i < progressiveList.size(); i++) {
-                    hints.progressive[i] = ((Number) progressiveList.get(i)).intValue();
+        if (progressive != null && progressive.trim().length()>0) {
+            if (progressive.equalsIgnoreCase("true")) {
+                hints.progressive = new int[]{100, 1000};
+            } else if (progressive.equalsIgnoreCase("false") ) {
+                hints.progressive = null;
+            } else {
+                String[] values = progressive.split(",");
+                hints.progressive = new int[values.length];
+                for (int i = 0; i < values.length; i++) {
+                    hints.progressive[i] = Integer.parseInt(values[i].trim());
                 }
-            } else if (progressiveObj instanceof Number[]) {
-                Number[] progressiveArray = (Number[]) progressiveObj;
-                hints.progressive = new int[progressiveArray.length];
-                for (int i = 0; i < progressiveArray.length; i++) {
-                    hints.progressive[i] = progressiveArray[i].intValue();
-                }
-            } else if (progressiveObj instanceof int[]) {
-                hints.progressive = (int[]) progressiveObj;
             }
         }
 
-        Object autoDetectDroppedClient = params.get("!autoDetectDroppedClient");
-        // true by default
-        if (autoDetectDroppedClient != null && autoDetectDroppedClient instanceof Boolean
-                && !((Boolean) autoDetectDroppedClient)) {
+        String autoDetectDroppedClient = servletRequest.getHeader("lightlink-auto-detect-dropped-client");
+
+        if (autoDetectDroppedClient != null && autoDetectDroppedClient.equalsIgnoreCase("false")) { // true by default
             hints.autoDetectDroppedClient = false;
         }
 
 
-        Object antiXSS = params.get("!antiXSS");
+        String antiXSS = servletRequest.getHeader("lightlink-anti-xss");
         // true by default
-        if (antiXSS != null && antiXSS instanceof Boolean
-                && !((Boolean) antiXSS)) {
+        if (antiXSS != null && antiXSS.equalsIgnoreCase("false")) {
             hints.antiXSS = false;
         }
 
@@ -71,4 +82,5 @@ public class Hints {
     public boolean isAntiXSS() {
         return antiXSS;
     }
+
 }

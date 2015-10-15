@@ -8,14 +8,14 @@ Later releases:
   - File download
 
 - Core:
-    L XML type support
+    - XML type support
     - call dynamic
     - queryForValue
     - generatedKeys support
 
 
 - Hints
-    T Auto detect dropped client
+    - Auto detect dropped client
 
 
 - Overload Protection (later)
@@ -24,18 +24,15 @@ Later releases:
 
 - Automated container web testing
 
+
 -    White list input parameters
 
 
 
 - Enterprise features
-    - Overload Protection (later)
-        - JS
-        - Server side
     - Caching with disk overflow
     - Clustering support
-    - Monitoring/
-
+    - Monitoring
 
 - Studio features
     - SP queries generation

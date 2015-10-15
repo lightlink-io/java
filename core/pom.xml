@@ -3,9 +3,10 @@
     <parent>
         <groupId>io.lightlink</groupId>
         <artifactId>globals</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.1</version>
     </parent>
 
+    <name>LightLink Core</name>
     <artifactId>lightlink-core</artifactId>
 
     <dependencies>
@@ -96,7 +97,13 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
             <version>4.1.4.RELEASE</version>
-            <scope>test</scope>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.3</version>
         </dependency>
 
         <dependency>
@@ -109,7 +116,7 @@
         <dependency>
             <groupId>io.lightlink</groupId>
             <artifactId>test-def</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -136,6 +143,30 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.8</version>
+                <configuration>
+                    <licenseName>lgpl_v3</licenseName>
+                    <verbose>false</verbose>
+                    <addSvnKeyWords>false</addSvnKeyWords>
+                    <roots>
+                        <root>src/main/java</root>
+                        <root>src/test</root>
+                    </roots>
+
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>first</id>
+                        <goals>
+                            <goal>update-file-header</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
 
     </build>

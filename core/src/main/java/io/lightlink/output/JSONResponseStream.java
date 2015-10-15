@@ -1,25 +1,64 @@
 package io.lightlink.output;
 
+/*
+ * #%L
+ * lightlink-core
+ * %%
+ * Copyright (C) 2015 Vitaliy Shevchuk
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
+
+
 import io.lightlink.config.ConfigManager;
 import io.lightlink.core.Hints;
 import io.lightlink.core.RunnerContext;
 import io.lightlink.facades.TypesFacade;
 import io.lightlink.security.AntiXSS;
+import io.lightlink.spring.LightLinkFilter;
 import io.lightlink.types.DateConverter;
 import jdk.nashorn.api.scripting.JSObject;
-import org.apache.commons.io.IOUtils;
-import org.json.simple.JSONValue;
+import org.apache.commons.beanutils.BeanMap;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class JSONResponseStream implements ResponseStream {
-    public static final String PROGRESSIVE_KEY = "\n\t \t\n";
+    public static final String PROGRESSIVE_KEY_STR = "\n\t \t\n";
+    public static final byte[] PROGRESSIVE_KEY = PROGRESSIVE_KEY_STR.getBytes();
+
+    public static final Charset CHARSET = Charset.forName("UTF-8");
+    public static final byte[] TOKEN_ARR_START = "\":[".getBytes();
+    public static final byte[] TOKEN_OBJ_START = "\":{".getBytes();
+    public static final String STR_QUOT = "\\\"";
+    public static final String STR_BACKSLASH = "\\\\";
+    public static final String STR_B = "\\b";
+    public static final String STR_F = "\\f";
+    public static final String STR_N = "\\n";
+    public static final String STR_R = "\\r";
+    public static final String STR_T = "\\t";
+    public static final String STR_SLASH = "\\/";
+    public static final String STR_SLASH_U = "\\u";
 
     boolean ended = false;
-    Writer out;
     int ident = 0;
     boolean debug = ConfigManager.isInDebugMode();
     RunnerContext runnerContext;
@@ -33,26 +72,32 @@ public class JSONResponseStream implements ResponseStream {
 
     private boolean antiXSS;
     private OutputStream outputStream;
+    private char rootTagOpen = '{';
+    private char rootTagClose = '}';
 
     public JSONResponseStream(OutputStream outputStream) {
-        try {
-            this.outputStream = outputStream;
-            this.out = new OutputStreamWriter(outputStream, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e.toString(), e); // should never happen
-        }
+        this.outputStream = outputStream;
         commaNeeded = false;
         ident = 0;
         ended = false;
         started = false;
+
+        initHints();
+
+    }
+
+    protected void initHints() {
+        if (LightLinkFilter.isThreadLocalStreamingDataSet()) {
+            Hints hints = LightLinkFilter.getThreadLocalStreamingData().getHints();
+            if (hints != null) {
+                progressiveBlockSizes = hints.getProgressiveBlockSizes();
+                antiXSS = hints.isAntiXSS();
+            }
+        }
     }
 
     protected OutputStream getOutputStream() {
         return outputStream;
-    }
-
-    public Writer getOut() throws IOException {
-        return out;
     }
 
     public RunnerContext getRunnerContext() {
@@ -63,37 +108,54 @@ public class JSONResponseStream implements ResponseStream {
         this.runnerContext = runnerContext;
     }
 
-    @Override
-    public void setHints(Hints hints) {
-        if (hints != null) {
-            progressiveBlockSizes = hints.getProgressiveBlockSizes();
-            antiXSS = hints.isAntiXSS();
-        }
-    }
 
-    private void identIn() throws IOException {
+    private void identIn() {
         writeIdent();
         ident++;
     }
 
-    private void identOut() throws IOException {
+    private void identOut() {
         ident--;
         writeIdent();
     }
 
-    private void writeIdent() throws IOException {
+    private void writeIdent() {
         if (debug) {
-            getOut().write("\n");
+            write('\n');
             for (int i = 0; i < ident; i++)
-                getOut().write("\t");
+                write('\t');
+        }
+    }
+
+    private void write(char c) {
+        try {
+            outputStream.write(c);
+        } catch (IOException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+    }
+
+    protected void write(byte[] byes, int size) {
+        try {
+            outputStream.write(byes, 0, size);
+        } catch (IOException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+    }
+
+    protected void write(byte[] byes) {
+        try {
+            outputStream.write(byes);
+        } catch (IOException e) {
+            throw new RuntimeException(e.toString(), e);
         }
     }
 
 
-    private void beginIfNeeded() throws IOException {
+    private void beginIfNeeded() {
         if (!started) {
             started = true;
-            getOut().write("{");
+            write(rootTagOpen);
             openBracesCount++;
 
             ident++;
@@ -101,26 +163,27 @@ public class JSONResponseStream implements ResponseStream {
     }
 
     @Override
-    public synchronized void end() throws IOException {
+    public synchronized void end() {
         if (!ended) {
             beginIfNeeded();
-            getOut().write("\n}");
+            write(rootTagClose);
             openBracesCount--;
-
-            flushBuffer();
             ended = true;
         }
     }
 
     @Override
-    public synchronized void writeProperty(String name, Object value) throws IOException {
+    public synchronized void writeProperty(String name, Object value) {
         beginIfNeeded();
+
         comma();
 
         identIn();
-        getOut().write("\"");
-        getOut().write(encodeQuotes(name));
-        getOut().write("\":");
+        write('"');
+        writeEscapedString(name);
+        write('"');
+        write(':');
+
         commaNeeded = false;
         writeFullObjectToArray(value);
         ident--;
@@ -128,10 +191,10 @@ public class JSONResponseStream implements ResponseStream {
     }
 
     @Override
-    public synchronized void writeFullObjectToArray(Object value) throws IOException {
+    public synchronized void writeFullObjectToArray(Object value) {
         beginIfNeeded();
 
-        if (value instanceof JSObject) {
+        if (value != null && value.getClass().getName().equals("jdk.nashorn.api.scripting.JSObject")) {
             JSObject jsObject = (JSObject) value;
             if (jsObject.isArray()) {
                 Object[] array = new Object[((Number) jsObject.getMember("length")).intValue()];
@@ -139,7 +202,7 @@ public class JSONResponseStream implements ResponseStream {
                 for (int i = 0; i < array.length; i++) {
                     writeFullObjectToArray(genericDateConvert(jsObject.getSlot(i)));
                 }
-                writeArryaEnd();
+                writeArrayEnd();
             } else {
                 writeObjectStart();
                 for (String key : jsObject.keySet()) {
@@ -155,8 +218,17 @@ public class JSONResponseStream implements ResponseStream {
             value = handlePrimitiveArrays(value, list);
             if (value instanceof Map) {
                 writeObjectStart();
-                for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
-                    writeProperty(entry.getKey() + "", entry.getValue());
+                Map<Object, Object> map = (Map<Object, Object>) value;
+                if (value instanceof BeanMap) {
+                    for (Map.Entry<Object, Object> entry : map.entrySet()) {
+                        if (!"class".equals(entry.getKey())) {
+                            writeProperty(entry.getKey() + "", entry.getValue());
+                        }
+                    }
+                } else {
+                    for (Map.Entry<Object, Object> entry : map.entrySet()) {
+                        writeProperty(entry.getKey() + "", entry.getValue());
+                    }
                 }
                 writeObjectEnd();
             } else if (value instanceof List) {
@@ -174,23 +246,28 @@ public class JSONResponseStream implements ResponseStream {
                 for (Object o : (Object[]) value) {
                     writeFullObjectToArray(o);
                 }
-                writeArryaEnd();
+                writeArrayEnd();
             } else if (value instanceof Date) {
-
-                TypesFacade tf = getRunnerContext().getTypesFacade();
-                String dateFormat = tf.getCustomDatePattern();
-                if (dateFormat == null)
+                String dateFormat;
+                if (getRunnerContext() != null && getRunnerContext().getTypesFacade().getCustomDatePattern() != null) {
+                    TypesFacade tf = getRunnerContext().getTypesFacade();
+                    dateFormat = tf.getCustomDatePattern();
+                } else
                     dateFormat = DateConverter.UNIVERSAL_DATE_FORMAT;
 
                 writeString(new SimpleDateFormat(dateFormat).format(value));
 
-            } else if (value == null || value instanceof Number || value instanceof Boolean) {
+            } else if (value == null) {
+
+                writeUnquoted("null");
+
+            } else if (value instanceof Number || value instanceof Boolean) {
 
                 writeUnquoted(value);
 
             } else {
 
-                writeString("" + value);
+                writeString(value.toString());
 
             }
 
@@ -200,44 +277,115 @@ public class JSONResponseStream implements ResponseStream {
 
     }
 
-    public void writeUnquoted(Object value) throws IOException {
-        getOut().write(value + "");
+    public void writeUnquoted(Object value) {
+        ByteBuffer byteBuffer = CHARSET.encode(value.toString());
+        write(byteBuffer.array(), byteBuffer.remaining());
     }
 
-    public void writeFromReader(Reader reader) throws IOException {
-        Writer out = getOut();
-        out.write('"');
-        IOUtils.copyLarge(reader, out);
-        out.write('"');
 
+    public void writeFromReader(Reader reader) {
+        write('"');
+        char[] buffer = new char[16000];
+        long count = 0;
+        int n = 0;
+        try {
+            while (-1 != (n = reader.read(buffer))) {
+
+                ByteBuffer bbuffer = CHARSET.encode(CharBuffer.wrap(buffer, 0, n));
+                write(bbuffer.array(), bbuffer.remaining());
+
+                count += n;
+            }
+            write('"');
+            reader.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
     }
-    public void writeInputStream(InputStream inputStream) throws IOException {
-        Writer out = getOut();
-        out.write('"');
+
+    public void writeInputStream(InputStream inputStream) {
+        write('"');
 
         byte[] buffer = new byte[3 * 1024];
         int length;
-        while ((length = inputStream.read(buffer)) != -1) {
-            String encodedBlock;
-            if (length < buffer.length) {
-                byte part[] = new byte[length];
-                System.arraycopy(buffer, 0, part, 0, length);
-                encodedBlock = DatatypeConverter.printBase64Binary(part);
-            } else {
-                encodedBlock = DatatypeConverter.printBase64Binary(buffer);
-            }
-            out.write(encodedBlock);
-        }
-        out.write('"');
+        try {
+            while ((length = inputStream.read(buffer)) != -1) {
+                String encodedBlock;
+                if (length < buffer.length) {
+                    byte part[] = new byte[length];
+                    System.arraycopy(buffer, 0, part, 0, length);
+                    encodedBlock = DatatypeConverter.printBase64Binary(part);
+                } else {
+                    encodedBlock = DatatypeConverter.printBase64Binary(buffer);
+                }
+                ByteBuffer bbuffer = CHARSET.encode(encodedBlock);
+                write(bbuffer.array(), bbuffer.remaining());
 
-        inputStream.close();
+            }
+            write('"');
+
+            inputStream.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
     }
 
-    public void writeString(String valueStr) throws IOException {
+    public void writeString(String valueStr) {
         if (antiXSS)
             valueStr = AntiXSS.escape(valueStr);
 
-        JSONValue.writeJSONString(valueStr, out);
+        write('\"');
+        writeEscapedString(valueStr);
+        write('\"');
+    }
+
+    private void writeEscapedString(String valueStr) {
+        char[] chars = valueStr.toCharArray();
+        StringBuffer sb = new StringBuffer(valueStr);
+        for (int i = chars.length - 1; i >= 0; i--) {
+            char ch = chars[i];
+            switch (ch) {
+                case '"':
+                    sb.replace(i, i + 1, STR_QUOT);
+                    break;
+                case '\\':
+                    sb.replace(i, i + 1, STR_BACKSLASH);
+                    break;
+                case '\b':
+                    sb.replace(i, i + 1, STR_B);
+                    break;
+                case '\f':
+                    sb.replace(i, i + 1, STR_F);
+                    break;
+                case '\n':
+                    sb.replace(i, i + 1, STR_N);
+                    break;
+                case '\r':
+                    sb.replace(i, i + 1, STR_R);
+                    break;
+                case '\t':
+                    sb.replace(i, i + 1, STR_T);
+                    break;
+                case '/':
+                    sb.replace(i, i + 1, STR_SLASH);
+                    break;
+                default:
+                    //Reference: http://www.unicode.org/versions/Unicode5.1.0/
+                    if ((ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u007F' && ch <= '\u009F') || (ch >= '\u2000' && ch <= '\u20FF')) {
+                        StringBuilder encoded = new StringBuilder();
+                        String ss = Integer.toHexString(ch).toUpperCase();
+                        encoded.append(STR_SLASH_U);
+                        for (int k = 0; k < 4 - ss.length(); k++) {
+                            encoded.append('0');
+                        }
+                        encoded.append(ss.toUpperCase());
+                        sb.replace(i, i + 1, encoded.toString());
+                    }
+            }
+        }
+        ByteBuffer buffer = CHARSET.encode(sb.toString());
+        write(buffer.array(), buffer.remaining());
+
     }
 
     private Object handlePrimitiveArrays(Object value, List list) {
@@ -270,64 +418,62 @@ public class JSONResponseStream implements ResponseStream {
     }
 
     @Override
-    public synchronized void writePropertyObjectStart(String name) throws IOException {
+    public synchronized void writePropertyObjectStart(String name) {
         beginIfNeeded();
         comma();
         identIn();
-        getOut().write("\"");
-        getOut().write(encodeQuotes(name));
-        getOut().write("\":{");
+        write('"');
+        writeEscapedString(name);
+        write(TOKEN_OBJ_START);
         openBracesCount++;
         commaNeeded = false;
     }
 
+
     @Override
-    public synchronized void writePropertyObjectEnt() throws IOException {
+    public synchronized void writePropertyObjectEnd() {
         beginIfNeeded();
         identOut();
-        getOut().write("}");
+        write('}');
         openBracesCount--;
         commaNeeded = true;
     }
 
     @Override
-    public synchronized void writePropertyArrayStart(String name) throws IOException {
+    public synchronized void writePropertyArrayStart(String name) {
         beginIfNeeded();
         comma();
         identIn();
-        getOut().write("\"");
-        getOut().write(encodeQuotes(name));
-        getOut().write("\":[");
-
+        write('"');
+        writeEscapedString(name);
+        write(TOKEN_ARR_START);
         currentProgressiveBlock = 0;
         currentRowNum = 0;
 
         commaNeeded = false;
+
     }
 
     @Override
-    public synchronized void writePropertyArrayEnd() throws IOException {
-        beginIfNeeded();
-        identOut();
-        getOut().write("]");
-        commaNeeded = true;
+    public synchronized void writePropertyArrayEnd() {
+        writeArrayEnd();
     }
 
     @Override
-    public synchronized void writeObjectStart() throws IOException {
+    public synchronized void writeObjectStart() {
         beginIfNeeded();
         comma();
         identIn();
-        getOut().write("{");
+        write('{');
         openBracesCount++;
         commaNeeded = false;
     }
 
     @Override
-    public synchronized void writeObjectEnd() throws IOException {
+    public synchronized void writeObjectEnd() {
         beginIfNeeded();
         identOut();
-        getOut().write("}");
+        write('}');
         openBracesCount--;
         commaNeeded = true;
 
@@ -336,16 +482,23 @@ public class JSONResponseStream implements ResponseStream {
 
     }
 
-    private void writeArrayStart() throws IOException {
-        beginIfNeeded();
-        comma();
-        identIn();
-        getOut().write("[");
+    public void writeArrayStart() {
+        if (!started) {
+            rootTagOpen = '[';
+            rootTagClose = ']';
+            beginIfNeeded();
+        } else {
+            beginIfNeeded();
+            comma();
+            identIn();
+            write('[');
 
-        currentProgressiveBlock = 0;
-        currentRowNum = 0;
+            currentProgressiveBlock = 0;
+            currentRowNum = 0;
 
-        commaNeeded = false;
+            commaNeeded = false;
+        }
+
     }
 
     @Override
@@ -358,43 +511,49 @@ public class JSONResponseStream implements ResponseStream {
         return true;
     }
 
-    private void progressiveLoadingSupport() throws IOException {
+    private void progressiveLoadingSupport() {
         if (progressiveBlockSizes != null && progressiveBlockSizes.length != 0) {
             currentRowNum++;
 
-            int currentBlockSize = progressiveBlockSizes.length <= currentProgressiveBlock
-                    ? progressiveBlockSizes[progressiveBlockSizes.length - 1]
-                    : progressiveBlockSizes[currentProgressiveBlock];
+
+            if (progressiveBlockSizes.length <= currentProgressiveBlock) {
+                return;
+            }
+            int currentBlockSize = progressiveBlockSizes[currentProgressiveBlock];
 
             if (currentRowNum >= currentBlockSize) {
                 currentProgressiveBlock++;
                 currentRowNum = 0;
 
                 for (int i = 0; i < openBracesCount; i++) {
-                    getOut().write("\t");//each <TAB> means one more brace to close to complete JSON request
+                    write('\t');//each <TAB> means one more brace to close to complete JSON request
                 }
-                getOut().write(PROGRESSIVE_KEY); // identify progressive loading block;
+                write(PROGRESSIVE_KEY); // identify progressive loading block;
 
-                flushBuffer();
-
+                try {
+                    flushBuffer();
+                } catch (IOException e) {
+                    throw new RuntimeException(e.toString(), e);
+                }
             }
 
         }
     }
 
-    private void writeArryaEnd() throws IOException {
+    public void writeArrayEnd() {
         beginIfNeeded();
         identOut();
-        getOut().write("]");
+        write(']');
         commaNeeded = true;
     }
 
-    private void comma() throws IOException {
+    private void comma() {
         if (commaNeeded) {
-            getOut().write(',');
+            write(',');
             commaNeeded = false;
         }
     }
+
 
     private String encodeQuotes(String name) {
         if (name.indexOf('"') == -1)
@@ -415,6 +574,6 @@ public class JSONResponseStream implements ResponseStream {
 
     @Override
     public void flushBuffer() throws IOException {
-        getOut().flush();
+        outputStream.flush();
     }
 }

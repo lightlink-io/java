@@ -1,5 +1,28 @@
 package io.lightlink.utils;
 
+/*
+ * #%L
+ * lightlink-core
+ * %%
+ * Copyright (C) 2015 Vitaliy Shevchuk
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
+
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -26,6 +49,8 @@ public class ClasspathScanUtils {
 
     private static List<String> getResourcesFromWebInf(String packageName, ServletContext servletContext) {
 
+        if (servletContext == null)
+            return Collections.EMPTY_LIST;
 
         List<String> res = new ArrayList<>();
 
@@ -87,7 +112,7 @@ public class ClasspathScanUtils {
     }
 
     private static void findFromDirectory(URL packageURL, List<String> names) throws UnsupportedEncodingException {
-        if (packageURL==null)
+        if (packageURL == null)
             return;
         File folder = new File(URLDecoder.decode(packageURL.getPath(), "UTF-8"));
 

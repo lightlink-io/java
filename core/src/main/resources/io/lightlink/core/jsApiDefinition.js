@@ -25,6 +25,7 @@ LL.HintManager = {
         if (lastIndex != -1) {
             if (hints.lastIndex != lastIndex) {
                 hints.lastIndex = lastIndex;
+                hints.partialCount = (hints.partialCount || 0) + 1;
                 responseText = responseText.substring(0, lastIndex);
                 lastIndex--;
                 responseText += "]";
@@ -49,7 +50,7 @@ LL.HintManager = {
     onReadyStateChange: function (xmlhttp, fnName, params, callback, scope, hints) {
         var res;
 
-        if (xmlhttp.readyState === 3 && hints.progressive) {
+        if (xmlhttp.readyState === 3 && hints.progressive && hints.partialCount != hints.progressive.length) {
             var responseText = xmlhttp.responseText;
 
             var completeJSON = this.completeJSON(responseText, hints);
@@ -83,7 +84,7 @@ LL.HintManager = {
                 }
                 LL.HintManager.callCallBack(callback, scope, res, false);
             } else {
-                hints.onHTTPError(fnName, params, callback, scope, hints);
+                hints.onHTTPError(xmlhttp, fnName, params, callback, scope, hints);
             }
         }
     },
@@ -92,20 +93,30 @@ LL.HintManager = {
     defaultOnJSONParsingError: function (e, xmlhttp, fnName, params, callback, scope, hints) {
         console.log("Error parsing JSON response for " + fnName + ": " + e, xmlhttp.responseText
             , "Redefine LL.HintManager.defaultHints.onJSONParsingError for custom handling");
-        alert("Error parsing JSON response for " + fnName + ": " + e);
+        if (confirm("Error parsing JSON response for " + fnName + ": " + e
+            + "\n\n Would you like to try to resubmit the request?")) {
+            LL.JsApi.ajax(fnName, params, callback, scope, hints)
+        }
     },
 
     defaultOnServerSideException: function (res, xmlhttp, fnName, params, callback, scope, hints) {
         console.log("Server exception: " + res.error, xmlhttp.responseText
             , res.stackTrace);
-        alert("Server exception: " + res.error);
         console.info("Redefine LL.HintManager.defaultHints.onServerSideException for custom messages");
+
+        if (confirm("Server exception: " + res.error
+            + "\n\n Would you like to try to resubmit the request?")) {
+            LL.JsApi.ajax(fnName, params, callback, scope, hints)
+        }
     },
 
     defaultOnHTTPError: function (xmlhttp, fnName, params, callback, scope, hints) {
         console.log("HTTP error from server while calling:" + fnName + ": " + xmlhttp.status
-            , "Redefine LL.HintManager.defaultHints.onJSONParsingError for custom handling");
-        alert("HTTP error from server while calling:" + fnName + ": " + xmlhttp.status);
+            , "Redefine LL.HintManager.defaultHints.onHTTPError for custom handling");
+        if (confirm("HTTP error from server while calling:" + fnName + ": " + xmlhttp.status
+            + "\n\n Would you like to try to resubmit the request?")) {
+            LL.JsApi.ajax(fnName, params, callback, scope, hints)
+        }
     },
 
     calcEffectiveHints: function (hints) {
@@ -137,13 +148,9 @@ LL.JsApi = {
 
     services: [], // list of registered services;
 
-    getXmlHttp: window.XMLHttpRequest
-        ? function () {
-        return new XMLHttpRequest()
-    }
-        : function () {
-        return new ActiveXObject("Microsoft.XMLHTTP")
-    },
+    getXmlHttp: window.ActiveXObject
+        ? function () { return new ActiveXObject("MSXML2.XMLHTTP.6.0") } // Must be "MSXML2.XMLHTTP.6.0" to support partial response
+        : function () { return new XMLHttpRequest() },
 
 
     ajax: function (fnName, params, callback, scope, hints) {
@@ -157,11 +164,16 @@ LL.JsApi = {
             LL.HintManager.onReadyStateChange(xmlhttp, fnName, params, callback, scope, hints);
         };
 
-        xmlhttp.open("POST", LL.JsApi.url + "/" + fnName.replace(/\./g, "/"), true);
+        var url = fnName.indexOf("/") == -1
+            ? LL.JsApi.url + "/" + fnName.replace(/\./g, "/")
+            : fnName;
+
+        xmlhttp.open("POST", url, true);
 
         if (hints) {
-            params["!progressive"] = hints.progressive;
-            params["!autoDetectDroppedClient"] = hints.autoDetectDroppedClient;
+            xmlhttp.setRequestHeader("lightlink-progressive", "" + hints.progressive);
+            xmlhttp.setRequestHeader("lightlink-auto-detect-dropped-client", "" + hints.autoDetectDroppedClient);
+            xmlhttp.setRequestHeader("lightlink-anti-xss", "" + hints.antiXss);
         }
 
         params.CSRF_Token = LL.JsApi.CSRF_Token;
@@ -171,6 +183,24 @@ LL.JsApi = {
 
     regService: function (fnName) {
         LL.JsApi.services.push(fnName);
+    },
+
+
+    defineCustomUrl: function (fnName, url) {
+
+        var packages = fnName.split(/\./g);
+        var ctx = window;
+        for (var i = 0; i < packages.length - 1; i++) {
+            var p = packages[i];
+            if (!ctx[p])
+                ctx[p] = {};
+            ctx = ctx[p];
+        }
+        var name = packages[packages.length - 1];
+
+        ctx[name] = function (param, callback, scope, hints) {
+            LL.JsApi.ajax(LL.JsApi.contextPath+url, param, callback, scope, hints);
+        }
     },
 
     define: function (fnName) {

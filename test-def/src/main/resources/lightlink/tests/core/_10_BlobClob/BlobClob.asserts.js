@@ -7,12 +7,11 @@ run({clobData: clobData, blobStringData: blobStringData}, function (res) {
     assertNotNull("rsDefault", res.rsDefault);
     assertTrue("rsDefault length", res.rsDefault.length == 1);
 
-    var bytes = [];
 
-    for (var i = 0; i < blobStringData.length; ++i)
-        bytes.push(blobStringData.charCodeAt(i));
+    var String = Java.type("java.lang.String");
+    var str = new String(blobStringData);
 
-    var strBase64 = Java.type("java.util.Base64").getEncoder().encodeToString(bytes);
+    var strBase64 = Java.type("javax.xml.bind.DatatypeConverter").printBase64Binary(str.getBytes());
 
     assertEquals("blob", res.rsDefault[0].blobField.length, 13);
 

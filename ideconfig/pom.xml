@@ -1,0 +1,27 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.lightlink</groupId>
+  <artifactId>ideconfig</artifactId>
+  <version>1.0.1</version>
+  <packaging>pom</packaging>
+
+  <licenses>
+    <license>
+      <name>GNU LESSER GENERAL PUBLIC LICENSE 3.0</name>
+      <url>http://www.gnu.org/licenses/lgpl-3.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+
+  <modules>
+
+    <module>../globals</module>
+    <module>../core</module>
+    <module>../test-def</module>
+    <module>../war-test</module>
+    <module>../war-spring-rest</module>
+
+  </modules>
+
+</project>
