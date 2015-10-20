@@ -120,6 +120,8 @@ public class AsyncHttpResponseStreamRunnable implements Runnable {
             }
         } catch (InterruptedException e) {
             /*do nothing*/
+        } catch (Throwable t) {
+            LogUtils.warn(this.getClass(),t);
         }
     }
 
