@@ -52,7 +52,7 @@ public class EmployeeController {
 
     }
 
-    @RequestMapping("/employeesStreamWithMapping")
+    @RequestMapping("/getPersonDetailAsStreamInPlainJDBC")
     public void getPersonDetailAsStreamInPlainJDBC() throws SQLException {
 
         Connection connection = null;
