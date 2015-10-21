@@ -70,6 +70,12 @@ public class AsyncHttpResponseStreamRunnable implements Runnable {
 
     }
 
+    /**
+     *  Detects the need to switch to sync mode in InputStream or a Reader is received from DB.
+     *  Those objects might not be available when ResultSet moves to next record.
+     * @param args
+     * @return
+     */
     private boolean shouldSwitchToSyncMode(Object[] args) {
         boolean asyncImpossible = false;
         if (args != null)
@@ -105,19 +111,20 @@ public class AsyncHttpResponseStreamRunnable implements Runnable {
             while (true) {
                 queueElement = queue.take();
 
+                if (queueElement == null)
+                    break;
+
                 if (queueElement.getMethod() == null) // NOP, used to unblock old queue when switching to sync Queue
                     continue;
 
                 try {
                     queueElement.getMethod().invoke(target, queueElement.getArgs());
                 } catch (IllegalAccessException e) {
-                    LogUtils.warn(this.getClass(), e);
+                    LogUtils.error(this.getClass(), e);
                 } catch (InvocationTargetException e) {
-                    if (e.getTargetException() instanceof IOException) {
-                        queue = new NoOpBlockingQueue();
-                        break;
-                    }
                     LogUtils.warn(this.getClass(), e);
+                    queue = new NoOpBlockingQueue();
+                    break;
                 }
 
                 if (queueElement.getMethod().getName().equals("end")) {
