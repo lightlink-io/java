@@ -110,9 +110,9 @@ public class AsyncHttpResponseStreamRunnable implements Runnable {
                 try {
                     queueElement.getMethod().invoke(target, queueElement.getArgs());
                 } catch (IllegalAccessException e) {
-                    LogUtils.error(this.getClass(), e);
+                    LogUtils.warn(this.getClass(), e);
                 } catch (InvocationTargetException e) {
-                    LogUtils.error(this.getClass(), e);
+                    LogUtils.warn(this.getClass(), e);
                 }
 
                 if (queueElement.getMethod().getName().equals("end"))
