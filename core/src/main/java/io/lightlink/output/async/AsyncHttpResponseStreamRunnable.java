@@ -27,6 +27,7 @@ import io.lightlink.output.HttpResponseStream;
 import io.lightlink.utils.LogUtils;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.InvocationHandler;
@@ -112,16 +113,22 @@ public class AsyncHttpResponseStreamRunnable implements Runnable {
                 } catch (IllegalAccessException e) {
                     LogUtils.warn(this.getClass(), e);
                 } catch (InvocationTargetException e) {
+                    if (e.getTargetException() instanceof IOException) {
+                        queue = new NoOpBlockingQueue();
+                        break;
+                    }
                     LogUtils.warn(this.getClass(), e);
                 }
 
-                if (queueElement.getMethod().getName().equals("end"))
+                if (queueElement.getMethod().getName().equals("end")) {
+                    queue = new NoOpBlockingQueue();
                     break; // method=end -> Exit signal
+                }
             }
         } catch (InterruptedException e) {
             /*do nothing*/
         } catch (Throwable t) {
-            LogUtils.warn(this.getClass(),t);
+            LogUtils.warn(this.getClass(), t);
         }
     }
 
