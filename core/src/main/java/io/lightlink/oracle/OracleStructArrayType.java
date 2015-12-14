@@ -95,7 +95,7 @@ public class OracleStructArrayType extends AbstractOracleType {
         if (array == null) {
             return null;
         } else {
-            List<Map<String, Object>> list = new ArrayList<>();
+            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 
             Object[] structs = (Object[]) array.getArray();
 

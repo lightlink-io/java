@@ -25,15 +25,13 @@ package io.lightlink.core;
 
 import io.lightlink.facades.ResponseFacade;
 import io.lightlink.facades.SQLFacade;
-import io.lightlink.output.JSONResponseStream;
-import io.lightlink.translator.ScriptTranslator;
-import io.lightlink.output.ResponseStream;
 import io.lightlink.facades.TxFacade;
 import io.lightlink.facades.TypesFacade;
+import io.lightlink.output.ResponseStream;
+import io.lightlink.translator.ScriptTranslator;
 import jdk.nashorn.api.scripting.JSObject;
 
 import javax.script.*;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -132,7 +130,11 @@ public class RunnerContext {
     }
 
     public Object getParam(String name) throws ScriptException {
-        return getScriptEngine().eval("$P['__" + name + "']");
+        Object res = getScriptEngine().eval("$P['__" + name + "']");
+        if (res instanceof CharSequence && !(res instanceof String)){
+            res =res.toString();
+        }
+        return res;
     }
 
     public void setParams(Map<String, Object> inputParams) {

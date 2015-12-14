@@ -41,7 +41,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class AsyncHttpResponseStreamRunnable implements Runnable {
 
 
-    BlockingQueue<QueueElement> queue = new LinkedBlockingQueue<>(10000);
+    BlockingQueue<QueueElement> queue = new LinkedBlockingQueue<QueueElement>(10000);
     HttpResponseStream facade;
     boolean syncMode = false;
     Object target;

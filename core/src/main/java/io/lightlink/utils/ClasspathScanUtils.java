@@ -41,7 +41,7 @@ public class ClasspathScanUtils {
 
 
     public static ArrayList<String> getAllResources(String packageName, ServletContext servletContext) throws IOException {
-        ArrayList<String> res = new ArrayList<>();
+        ArrayList<String> res = new ArrayList<String>();
         res.addAll(getResourcesFromPackage(packageName));
         res.addAll(getResourcesFromWebInf(packageName, servletContext));
         return res;
@@ -52,23 +52,13 @@ public class ClasspathScanUtils {
         if (servletContext == null)
             return Collections.EMPTY_LIST;
 
-        List<String> res = new ArrayList<>();
+        List<String> res = new ArrayList<String>();
 
-        try {
-            URL url = servletContext.getResource('/' + packageName.replace('.', '/'));
-            findFromDirectory(url, res);
-        } catch (MalformedURLException e) { /* skip and keep searching */
-        } catch (UnsupportedEncodingException e) { /* */ }
-
-        try {
-            URL url = servletContext.getResource("/WEB-INF/" + packageName.replace('.', '/'));
-            findFromDirectory(url, res);
-
-        } catch (MalformedURLException e) { /* skip and keep searching */
-        } catch (UnsupportedEncodingException e) { /* */ }
+        findFromServletContext(servletContext, "/WEB-INF/" + packageName.replace('.', '/')+"/","", res);
 
         return res;
     }
+
 
     public static List<String> getResourcesFromPackage(String packageName) throws IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -110,6 +100,18 @@ public class ClasspathScanUtils {
 
         return names;
     }
+
+    private static void findFromServletContext(ServletContext servletContext, String initialPath, String currentPath, List<String> res) {
+        String totalPath = initialPath+currentPath;
+        if (totalPath.endsWith("/")){
+            Set<String> paths = servletContext.getResourcePaths(totalPath);
+            for (String p : paths) {
+                findFromServletContext(servletContext, initialPath, p.substring(initialPath.length()), res);
+            }
+        } else
+            res.add(currentPath);
+    }
+
 
     private static void findFromDirectory(URL packageURL, List<String> names) throws UnsupportedEncodingException {
         if (packageURL == null)

@@ -115,7 +115,7 @@ public abstract class AbstractOracleType extends AbstractConverter {
     protected Map<String,Object> getMapFromStruct(OracleConnection con, Struct struct) throws SQLException {
 
         Object[] attributes = struct.getAttributes();
-        HashMap<String, Object> res = new HashMap<>();
+        HashMap<String, Object> res = new HashMap<String, Object>();
 
         StructDescriptor structType = safeCreateStructureDescriptor(struct.getSQLTypeName(), con);
         ResultSetMetaData stuctMeteData = structType.getMetaData();

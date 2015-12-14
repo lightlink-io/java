@@ -166,7 +166,7 @@ public class JsMethodsDefinitionServlet extends AbstractLightLinkServlet {
 
     private Map<String, String> getCustomServices() throws IOException {
         // list custom services
-        Map<String, String> customServices = new LinkedHashMap<>();
+        Map<String, String> customServices = new LinkedHashMap<String,String>();
 
         Script customServicesScript = configManager.getScript("#customServices.js", false);
 

@@ -24,10 +24,10 @@ package io.lightlink.sql;
 
 
 import io.lightlink.autostop.AutoStopQuery;
-import io.lightlink.translator.ScriptTranslator;
 import io.lightlink.core.RunnerContext;
 import io.lightlink.facades.SQLFacade;
 import io.lightlink.output.ResponseStream;
+import io.lightlink.translator.ScriptTranslator;
 import io.lightlink.types.*;
 import io.lightlink.utils.Utils;
 import jdk.nashorn.api.scripting.JSObject;
@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import javax.script.ScriptException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
 import java.io.InputStream;
 import java.sql.*;
 import java.util.*;

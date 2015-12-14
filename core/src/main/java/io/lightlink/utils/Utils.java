@@ -24,16 +24,13 @@ package io.lightlink.utils;
 
 
 import io.lightlink.config.ConfigManager;
-import io.lightlink.config.Script;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.internal.runtime.ScriptObject;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -98,7 +95,7 @@ public class Utils {
                 res.add(((float[]) value)[i]);
             }
             return res;
-        } else if (value instanceof ScriptObjectMirror && "Date".equalsIgnoreCase(((ScriptObjectMirror) value).getClassName())){
+        } else if (value instanceof ScriptObjectMirror && "Date".equalsIgnoreCase(((ScriptObjectMirror) value).getClassName())) {
             Double time = (Double) ((ScriptObjectMirror) value).callMember("getTime");
             return new Date(time.longValue());
 
@@ -153,7 +150,7 @@ public class Utils {
         String[] parts = name.split("[\\./]"); // split by . or /
 
         for (String part : parts) {
-            if (part.length()==0)
+            if (part.length() == 0)
                 continue;
             char c1 = part.charAt(0);
             if (!Character.isAlphabetic(c1))
@@ -165,20 +162,30 @@ public class Utils {
     public static URL getUrl(String name, ServletContext servletContext) {
         URL url = Thread.currentThread().getContextClassLoader().getResource(name);
         if (url == null && servletContext != null) {
-            try {
-                url = servletContext.getResource("/WEB-INF/" + name);
-            } catch (MalformedURLException e) {/* keep trying*/ }
+            url = getUrlFromServletContext("/WEB-INF/" + name, servletContext);
         }
 
         if (url == null && servletContext != null) {
-            try {
-                url = servletContext.getResource("/" + name);
-            } catch (MalformedURLException e) {/* nothing found just return null */ }
+            url = getUrlFromServletContext("/" + name, servletContext);
         }
 
         if (url == null)
             return null;
         return url;
+    }
+
+    private static URL getUrlFromServletContext(String name, ServletContext servletContext) {
+        try {
+            URL resource = servletContext.getResource(name);
+            if (resource!=null){
+                String realPath = servletContext.getRealPath(name);
+
+                resource = new File(realPath).toURI().toURL();
+            }
+            return resource;
+        } catch (MalformedURLException e) {/* keep trying*/
+            return null;
+        }
     }
 
 //    public static HttpServletResponse createHttpServletResponseMock(final StringWriter sw) {

@@ -87,7 +87,7 @@ public class ObjectBufferResponseStream implements ResponseStream{
 //    public void writeArrayStart() {
 //        if (stack.size()==1 && stack.peek() instanceof Map){
 //            stack.clear();
-//            data = new ArrayList<>();
+//            data = new ArrayList<Object>();
 //            stack.push(data);
 //        }
 //        List<Object> current = (List<Object>) stack.peek();
