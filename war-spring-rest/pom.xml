@@ -5,7 +5,7 @@
 
     <groupId>io.lightlink</groupId>
     <artifactId>war-spring-rest</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.3</version>
     <packaging>war</packaging>
 
     <parent>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>io.lightlink</groupId>
             <artifactId>lightlink-core</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>1.0.3</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
