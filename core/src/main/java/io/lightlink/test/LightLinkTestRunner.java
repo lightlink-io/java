@@ -67,7 +67,7 @@ public class LightLinkTestRunner extends Runner {
 
         for (Iterator<String> iterator = resourcesFromPackage.iterator(); iterator.hasNext(); ) {
             String resource = iterator.next();
-            if (resource.matches("^.*\\.js\\.sql$") && !resource.matches(".*[\\\\/]config\\.js\\.sql")){
+            if (resource.matches("^.*\\.asserts\\.js$") ){
                 fileList.add(ClasspathScanUtils.getFileFromResource(rootPackage,resource));
             }
         }

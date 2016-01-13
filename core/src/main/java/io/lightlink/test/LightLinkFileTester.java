@@ -84,14 +84,18 @@ public class LightLinkFileTester {
     }
 
     public String run(Object params) throws IOException, ScriptException {
-        executionNumber++;
 
 
         String[] parts = file.getAbsolutePath().replaceAll("\\\\", "/").split(
                 rootPackage.replaceAll("\\.", "[\\\\/]") + "/"
         );
-        String actionName = parts[parts.length - 1].replaceAll(".js.sql", "");
+        String actionName = parts[parts.length - 1].replaceAll(".js.sql", "").replaceAll(".asserts.js", "");
 
+        return runAction(actionName, params);
+    }
+
+    public String runAction(String actionName, Object params) throws IOException {
+        executionNumber++;
         Map<String, Object> inputParams = new HashMap<String, Object>();
 
 

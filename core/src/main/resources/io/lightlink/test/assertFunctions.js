@@ -3,6 +3,11 @@ function run(params, callback) {
         "(" + tester.run(params) + ")"
     ));
 }
+function runAction(actionName,params, callback) {
+    callback(eval(  // transform JSON to object
+        "(" + tester.runAction(actionName,params) + ")"
+    ));
+}
 
 function throwError(message) {
     try {

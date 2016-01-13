@@ -29,6 +29,7 @@ import io.lightlink.spring.LightLinkFilter;
 import io.lightlink.spring.StreamingResponseData;
 import io.lightlink.utils.Utils;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,6 +39,14 @@ import java.util.Map;
 
 public class RestServlet extends AbstractLightLinkServlet {
 
+    private boolean noCSRF = false;
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        String tokenCheck = config.getInitParameter("No-CSRF-token-check");
+        noCSRF = tokenCheck != null && (tokenCheck.equalsIgnoreCase("true"));
+    }
 
     protected void doServide(String method, HttpServletRequest req, HttpServletResponse resp, Map<String, Object> inputParams) throws IOException {
 
@@ -92,17 +101,24 @@ public class RestServlet extends AbstractLightLinkServlet {
         LightLinkFilter.setThreadLocalStreamingData(new StreamingResponseData(req, resp));
 
         Map<String, Object> params = getParams(req);
+        boolean safe = noCSRF || csrfCheck(req, resp, params);
+        if (safe) {
+            resp.setContentType("application/json; charset=UTF-8");
+            doServide(method, req, resp, params);
+        }
+    }
+
+    protected boolean csrfCheck(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> params) throws IOException {
+
         CSRFTokensContainer tokensContainer = CSRFTokensContainer.getInstance(req.getSession());
         String token = tokensContainer.validate(params);
 
         if (token == null) {
             tokensContainer.sendCsrfError(resp);
-            return;
+            return false;
+        } else {
+            return true;
         }
-
-        resp.setContentType("application/json; charset=UTF-8");
-
-        doServide(method, req, resp, params);
     }
 
 

@@ -30,6 +30,6 @@ import org.junit.runner.RunWith;
 
 public class MySQLTestManual {
 
-    // all *.js.sql files from this package will be tested
+    // all *.asserts.js files from this package will be tested
 
 }
