@@ -4,3 +4,4 @@ sql.setConnection("oracle.jdbc.OracleDriver","jdbc:oracle:thin:@tiths110.fr.net.
 sql.getConnection().setAutoCommit(false);
 
 
+// todo : register custom types

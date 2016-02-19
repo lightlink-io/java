@@ -67,7 +67,7 @@ public class OracleStructArrayType extends AbstractOracleType {
                     record = map;
                 }
 
-                structArray[i] = createStructFromMap(con, (Map) record, arrayStructDesc.getBaseName());
+                structArray[i] = createStruct(con, (Map) record, arrayStructDesc.getBaseName());
             }
 
             return new ARRAY(arrayStructDesc, con, structArray);

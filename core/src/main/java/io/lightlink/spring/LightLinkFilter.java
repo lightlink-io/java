@@ -24,7 +24,6 @@ package io.lightlink.spring;
 
 
 import io.lightlink.config.ConfigManager;
-import io.lightlink.output.JSONHttpResponseStream;
 import io.lightlink.output.ResponseStream;
 import io.lightlink.utils.LogUtils;
 
@@ -34,9 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class LightLinkFilter implements Filter {
 

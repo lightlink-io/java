@@ -23,14 +23,11 @@ package io.lightlink.output;
  */
 
 
-import io.lightlink.config.ConfigManager;
-import io.lightlink.core.Hints;
 import io.lightlink.spring.LightLinkFilter;
 import io.lightlink.spring.StreamingResponseData;
 import junit.framework.TestCase;
 import org.apache.commons.io.output.NullOutputStream;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 

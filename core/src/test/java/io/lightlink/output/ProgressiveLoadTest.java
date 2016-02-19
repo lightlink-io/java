@@ -23,7 +23,6 @@ package io.lightlink.output;
  */
 
 
-import io.lightlink.core.Hints;
 import io.lightlink.spring.LightLinkFilter;
 import io.lightlink.spring.StreamingResponseData;
 import junit.framework.TestCase;

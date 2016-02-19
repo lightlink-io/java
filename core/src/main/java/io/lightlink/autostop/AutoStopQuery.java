@@ -24,7 +24,6 @@ package io.lightlink.autostop;
 
 
 import io.lightlink.core.RunnerContext;
-import io.lightlink.output.ResponseStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,9 @@ import java.lang.ref.WeakReference;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Timer;
 
 public class AutoStopQuery {
 

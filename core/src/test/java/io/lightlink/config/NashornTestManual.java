@@ -24,7 +24,6 @@ package io.lightlink.config;
 
 
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.ScriptUtils;
 import junit.framework.TestCase;
 
 import javax.script.*;

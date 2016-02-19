@@ -25,23 +25,14 @@ package io.lightlink.servlet.debug;
 
 import io.lightlink.config.ConfigManager;
 import io.lightlink.config.Script;
-import io.lightlink.core.ScriptRunner;
 import io.lightlink.servlet.AbstractLightLinkServlet;
 import io.lightlink.translator.JSBeautifyPostProcessor;
-import io.lightlink.utils.ClasspathScanUtils;
-import io.lightlink.utils.Utils;
-import org.apache.commons.io.IOUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 public class DebugMethodsDefinitionServlet extends AbstractLightLinkServlet {
 

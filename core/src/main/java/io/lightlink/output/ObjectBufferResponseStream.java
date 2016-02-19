@@ -23,12 +23,8 @@ package io.lightlink.output;
  */
 
 
-import io.lightlink.core.Hints;
 import io.lightlink.core.RunnerContext;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.*;
 
 public class ObjectBufferResponseStream implements ResponseStream{

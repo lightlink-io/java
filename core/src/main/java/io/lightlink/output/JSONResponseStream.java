@@ -34,12 +34,18 @@ import jdk.nashorn.api.scripting.JSObject;
 import org.apache.commons.beanutils.BeanMap;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class JSONResponseStream implements ResponseStream {
     public static final String PROGRESSIVE_KEY_STR = "\n\t \t\n";

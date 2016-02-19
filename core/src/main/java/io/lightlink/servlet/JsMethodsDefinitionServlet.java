@@ -40,6 +40,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.*;
@@ -106,10 +107,11 @@ public class JsMethodsDefinitionServlet extends AbstractLightLinkServlet {
 
         Set<String> services = getServicesNames();
 
-        URL definitionScript = Thread.currentThread().getContextClassLoader()
-                .getResource("io/lightlink/core/jsApiDefinition.js");
+        InputStream definitionScript = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("io/lightlink/core/jsApiDefinition.js");
 
         StringBuilder sb = new StringBuilder(IOUtils.toString(definitionScript));
+        definitionScript.close();
 
         String lightLinkUrl = req.getServletPath().split("-api/")[0];
         sb.append("\n\nLL.JsApi.contextPath='").append(req.getContextPath()).append("';\n");

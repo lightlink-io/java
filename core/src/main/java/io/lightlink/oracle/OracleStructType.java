@@ -26,14 +26,15 @@ package io.lightlink.oracle;
 import io.lightlink.core.RunnerContext;
 import oracle.jdbc.OracleCallableStatement;
 import oracle.jdbc.OracleConnection;
-import oracle.jdbc.OracleResultSet;
 import oracle.jdbc.OracleTypes;
-import oracle.sql.STRUCT;
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.collections.map.CaseInsensitiveMap;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Map;
 
 public class OracleStructType extends AbstractOracleType {
@@ -49,7 +50,7 @@ public class OracleStructType extends AbstractOracleType {
             value = map;
         }
 
-        return createStructFromMap(con, (Map) value, getCustomSQLTypeName());
+        return createStruct(con, (Map) value, getCustomSQLTypeName());
 
     }
 

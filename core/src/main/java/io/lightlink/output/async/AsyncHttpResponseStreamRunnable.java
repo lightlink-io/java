@@ -26,8 +26,6 @@ package io.lightlink.output.async;
 import io.lightlink.output.HttpResponseStream;
 import io.lightlink.utils.LogUtils;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.InvocationHandler;

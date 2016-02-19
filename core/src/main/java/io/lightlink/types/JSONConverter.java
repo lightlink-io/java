@@ -28,7 +28,10 @@ import org.json.simple.JSONValue;
 import org.postgresql.util.PGobject;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class JSONConverter extends AbstractConverter {
 

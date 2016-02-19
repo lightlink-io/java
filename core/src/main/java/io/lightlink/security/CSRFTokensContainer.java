@@ -30,7 +30,10 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class CSRFTokensContainer implements Serializable {
 

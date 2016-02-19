@@ -31,7 +31,6 @@ import org.apache.commons.fileupload.util.Streams;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 
 public class MultipartParameters {

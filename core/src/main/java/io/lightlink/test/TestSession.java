@@ -23,7 +23,6 @@ package io.lightlink.test;
  */
 
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

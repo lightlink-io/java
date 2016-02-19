@@ -24,9 +24,7 @@ package io.lightlink.dao;
 
 
 import junit.framework.TestCase;
-import org.apache.commons.beanutils.PropertyUtils;
 
-import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.util.*;
 

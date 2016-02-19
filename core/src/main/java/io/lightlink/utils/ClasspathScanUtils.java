@@ -24,13 +24,11 @@ package io.lightlink.utils;
 
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
@@ -54,7 +52,7 @@ public class ClasspathScanUtils {
 
         List<String> res = new ArrayList<String>();
 
-        findFromServletContext(servletContext, "/WEB-INF/" + packageName.replace('.', '/')+"/","", res);
+        findFromServletContext(servletContext, "/WEB-INF/" + packageName.replace('.', '/') + "/", "", res);
 
         return res;
     }
@@ -102,12 +100,13 @@ public class ClasspathScanUtils {
     }
 
     private static void findFromServletContext(ServletContext servletContext, String initialPath, String currentPath, List<String> res) {
-        String totalPath = initialPath+currentPath;
-        if (totalPath.endsWith("/")){
+        String totalPath = initialPath + currentPath;
+        if (totalPath.endsWith("/")) {
             Set<String> paths = servletContext.getResourcePaths(totalPath);
-            for (String p : paths) {
-                findFromServletContext(servletContext, initialPath, p.substring(initialPath.length()), res);
-            }
+            if (paths != null)
+                for (String p : paths) {
+                    findFromServletContext(servletContext, initialPath, p.substring(initialPath.length()), res);
+                }
         } else
             res.add(currentPath);
     }
