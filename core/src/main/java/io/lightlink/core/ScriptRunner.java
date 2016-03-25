@@ -43,10 +43,7 @@ import javax.script.ScriptException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,6 +55,8 @@ public class ScriptRunner {
     ConfigManager cm;
     HttpServletRequest request;
     private ServletContext servletContext;
+
+    public static final Object DEBUG_FILE_ACCESS_LOCK = new Object();
 
     public ScriptRunner(String rootPackage) {
         cm = new ConfigManager(rootPackage);
@@ -141,11 +140,7 @@ public class ScriptRunner {
                         if (debugOutput.matches("^/[A-Z]:.+"))
                             debugOutput = debugOutput.substring(1); // trim / from "/C:/..."
 
-                        FileOutputStream fos = new FileOutputStream(debugOutput);
-                        fos.write(("//@ sourceURL="+debugOutput+"\n").getBytes("UTF-8"));
-
-                        fos.write(content.getBytes("UTF-8"));
-                        fos.close();
+                        refreshTranslatedDebugFile(content, debugOutput, filePath);
 
                         content = "load(\"" + debugOutput.replaceAll("\"", "\\\"") + "\");";
                     }
@@ -179,7 +174,7 @@ public class ScriptRunner {
                 runnerContext.getResponseStream().writeProperty("stackTrace", sw.toString());
             }
 
-            LogUtils.error(this.getClass(),e);
+            LogUtils.error(this.getClass(), e);
 
             txFacade.failure();
 
@@ -192,6 +187,24 @@ public class ScriptRunner {
 
         runnerContext.getResponseStream().end();
 
+    }
+
+    private void refreshTranslatedDebugFile(String content, String debugFilePath, String jsSqlFilePath) throws IOException {
+        synchronized (DEBUG_FILE_ACCESS_LOCK) {
+            File jsSql = new File(jsSqlFilePath);
+            File debug = new File(debugFilePath);
+
+            boolean needDebugFileUpdate = !debug.exists() || jsSql.lastModified() > debug.lastModified();
+            if (needDebugFileUpdate){
+                FileOutputStream fos = new FileOutputStream(debugFilePath);
+                try {
+                    fos.write(("//@ sourceURL=" + debugFilePath + "\n").getBytes("UTF-8"));
+                    fos.write(content.getBytes("UTF-8"));
+                } finally {
+                    fos.close();
+                }
+            }
+        }
     }
 
     private Map<String, Object> getHeadersMap() {
