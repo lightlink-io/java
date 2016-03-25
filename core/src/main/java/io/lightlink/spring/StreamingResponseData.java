@@ -107,4 +107,8 @@ public class StreamingResponseData {
             }
         }
     }
+
+    public HttpServletRequest getServletRequest() {
+        return servletRequest;
+    }
 }

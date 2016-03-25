@@ -22,7 +22,11 @@ var JSProxy = {
         return function () {
             var args = [];
             for (var i = 0; i < arguments.length; i++) {
-                args[i] = arguments[i];
+                var arg = arguments[i];
+                if (typeof arg=="function" && arg.objectId){
+                    arg = {objectId:arg.objectId}; //class stub
+                }
+                args[i] = arg;
             }
 
             return  JSProxy.descrToStub($Debug.sjax({

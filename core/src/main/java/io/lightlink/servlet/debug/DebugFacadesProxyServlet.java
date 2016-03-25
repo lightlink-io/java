@@ -108,7 +108,7 @@ public class DebugFacadesProxyServlet extends HttpServlet {
         ObjectPoolElement element = pool.get(objectId);
         Object instance = element.getObject();
 
-        if (instance instanceof HttpRequestPlaceholder)
+        if (instance instanceof HttpServletRequest)
             instance = request;
 
         Class cls = (instance instanceof Class) ? (Class) instance : instance.getClass();
@@ -137,13 +137,16 @@ public class DebugFacadesProxyServlet extends HttpServlet {
         Class<?>[] pTypes = method.getParameterTypes();
         for (int i = 0; i < argsArray.length; i++) {
             Object arg = argsArray[i];
-            if (arg instanceof Object[] && pTypes[i].equals(byte[].class)){
+            if (arg instanceof Object[] && pTypes[i].equals(byte[].class)) {
                 Object[] argObjArray = (Object[]) arg;
                 byte[] bytes = new byte[argObjArray.length];
                 for (int j = 0; j < argObjArray.length; j++) {
-                    bytes[j] = ((Number)argObjArray[j]).byteValue();
+                    bytes[j] = ((Number) argObjArray[j]).byteValue();
                 }
                 argsArray[i] = bytes;
+            }
+            if (arg instanceof Object[] && pTypes[i].equals(Iterable.class)) {
+                argsArray[i] = Arrays.asList((Object[]) arg);
             }
         }
 
@@ -169,7 +172,7 @@ public class DebugFacadesProxyServlet extends HttpServlet {
         replaceStubsByObjects(args);
 
         Constructor[] candidates = Class.forName(className).getConstructors();
-        MethodOrConstructorWrapper constructor =  findMethod(args, MethodOrConstructorWrapper.getArray(candidates));
+        MethodOrConstructorWrapper constructor = findMethod(args, MethodOrConstructorWrapper.getArray(candidates));
         if (constructor == null)
             throw new RuntimeException("Cannot find constructor for class:" + className + " wiht parameters: " + args);
 
@@ -301,7 +304,7 @@ public class DebugFacadesProxyServlet extends HttpServlet {
         json.writeProperty("value", instance);
     }
 
-    private MethodOrConstructorWrapper findMethod(List args, MethodOrConstructorWrapper [] methods) {
+    private MethodOrConstructorWrapper findMethod(List args, MethodOrConstructorWrapper[] methods) {
         List<MethodOrConstructorWrapper> candidates = new ArrayList<MethodOrConstructorWrapper>();
         for (MethodOrConstructorWrapper c : methods) {
             if (c.getParameterTypes().length == args.size())
@@ -370,15 +373,38 @@ public class DebugFacadesProxyServlet extends HttpServlet {
     TreeSet<Long> generations = new TreeSet<Long>();
 
 
+    private void replaceStubsByObjects(Map map) {
+        for (Object o : map.entrySet()) {
+            Map.Entry entry = (Map.Entry) o;
+            Object value = entry.getValue();
+            if (value instanceof Map) {
+                Number objectId = (Number) ((Map) value).get("objectId");
+                if (objectId != null) {
+                    entry.setValue(pool.get(objectId.intValue()).getObject());
+                } else {
+                    replaceStubsByObjects((Map) value);
+                }
+            } else if (value instanceof List) {
+                replaceStubsByObjects((List) value);
+            }
+        }
+
+    }
+
     private void replaceStubsByObjects(List args) {
         for (int i = 0; i < args.size(); i++) {
-            Object arg = args.get(i);
-            if (arg instanceof Map) {
-                Number objectId = (Number) ((Map) arg).get("objectId");
+            Object value = args.get(i);
+            if (value instanceof Map) {
+                Number objectId = (Number) ((Map) value).get("objectId");
                 if (objectId != null) {
                     args.set(i, pool.get(objectId.intValue()).getObject());
+                } else {
+                    replaceStubsByObjects((Map) value);
                 }
+            } else if (value instanceof List) {
+                replaceStubsByObjects((List) value);
             }
+
         }
     }
 

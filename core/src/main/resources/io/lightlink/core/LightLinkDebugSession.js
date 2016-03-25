@@ -1,15 +1,16 @@
 LL.DebugSession = function () {
 
-    this.request = new (Java.type("io.lightlink.servlet.debug.HttpRequestPlaceholder"))();
-    this.session  =this.request.getSession();
 
     var context = new (Java.type("io.lightlink.core.debug.RemoteDebugRunnerContext"))();
     this.context = context;
     this.sql = new (Java.type("io.lightlink.facades.SQLFacade"))(context);
     this.tx = this.context.getTxFacade();
     this.types = this.context.getTypesFacade();
-    this.resp = context.getResponseStream();
+    this.env = new (Java.type("io.lightlink.facades.debug.DebugSessionEnv"));
+
     var response = this.response = context.getResponseFacade();
+
+    this.resp = context.getResponseStream();
 
     this.sql.query_orig = this.sql.query;
     this.sql.queryToBuffer_orig = this.sql.queryToBuffer;
@@ -61,8 +62,8 @@ LL.DebugSession = function () {
     window.types = this.types;
     window.tx = this.tx;
     window.response = this.response;
-    window.request = this.request;
-    window.session = this.session;
+    window.env = this.env;
 
+    window.$P = {};
 
 };
