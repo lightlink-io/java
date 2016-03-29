@@ -53,7 +53,7 @@ public class CSRFTokensContainer implements Serializable {
     }
 
     public static String getToken(Map<String, Object> inputParams) {
-        return (String) inputParams.get(CSRF_TOKEN_NAME);
+        return ""+ inputParams.get(CSRF_TOKEN_NAME);
     }
 
     public String createNewToken() {

@@ -69,7 +69,7 @@ public class Hints {
 
 
         String antiXSS = servletRequest.getHeader("lightlink-anti-xss");
-        // true by default
+        // false by default
         if (antiXSS != null && antiXSS.equalsIgnoreCase("false")) {
             hints.antiXSS = false;
         }
