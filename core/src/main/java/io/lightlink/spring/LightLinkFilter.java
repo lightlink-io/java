@@ -41,7 +41,7 @@ public class LightLinkFilter implements Filter {
 
 
     public static boolean isThreadLocalStreamingDataSet() {
-        return threadLocalInstance.get()!=null;
+        return threadLocalInstance.get() != null;
     }
 
     public static StreamingResponseData getThreadLocalStreamingData() {
@@ -99,7 +99,8 @@ public class LightLinkFilter implements Filter {
             }
 
         } finally {
-                responseData.end();
+            responseData.end();
+            threadLocalInstance.remove();
         }
 
 
