@@ -4,7 +4,7 @@
   <artifactId>globals</artifactId>
   <name>LightLink Globals</name>
   <description>SQL + NoSQL + JavaScript. Rapid Applications Devalopment Java/JEE server stack for Web 2.0.</description>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <packaging>pom</packaging>
 
   <licenses>
@@ -43,7 +43,6 @@
     <url>https://github.com/lightlink-io/java</url>
   </scm>
 
-
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
@@ -54,8 +53,6 @@
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
-
-
   <build>
     <plugins>
       <plugin>
@@ -69,7 +66,6 @@
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>

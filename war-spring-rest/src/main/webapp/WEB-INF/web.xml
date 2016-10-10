@@ -21,7 +21,14 @@
         <url-pattern>/lightlink/*</url-pattern>
     </filter-mapping>
 
-    <servlet><servlet-name>RestServlet</servlet-name><servlet-class>io.lightlink.servlet.RestServlet</servlet-class></servlet>
+    <servlet>
+        <servlet-name>RestServlet</servlet-name>
+        <servlet-class>io.lightlink.servlet.RestServlet</servlet-class>
+        <init-param>
+            <param-name>No-CSRF-token-check</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
     <servlet><servlet-name>JsProxyServlet</servlet-name><servlet-class>io.lightlink.servlet.JsProxyServlet</servlet-class></servlet>
     <servlet><servlet-name>jsApiDefinitionServlet</servlet-name><servlet-class>io.lightlink.servlet.JsMethodsDefinitionServlet</servlet-class></servlet>
     <servlet><servlet-name>DebugApiDefinitionServlet</servlet-name><servlet-class>io.lightlink.servlet.debug.DebugMethodsDefinitionServlet</servlet-class></servlet>

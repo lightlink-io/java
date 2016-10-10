@@ -3,7 +3,7 @@
     <parent>
         <groupId>io.lightlink</groupId>
         <artifactId>globals</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
         <relativePath>../globals/pom.xml</relativePath>
     </parent>
 
@@ -117,7 +117,7 @@
         <dependency>
             <groupId>io.lightlink</groupId>
             <artifactId>test-def</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
             <scope>test</scope>
         </dependency>
 
