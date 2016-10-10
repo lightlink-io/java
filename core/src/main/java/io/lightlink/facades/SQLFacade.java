@@ -214,6 +214,8 @@ public class SQLFacade {
         try {
             if (connection != null)
                 connection.close();
+            connection = null;
+
         } catch (SQLException e) { /* ignore */ }
 
         // close child instances connections

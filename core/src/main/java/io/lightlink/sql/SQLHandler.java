@@ -23,7 +23,6 @@ package io.lightlink.sql;
  */
 
 
-import io.lightlink.autostop.AutoStopQuery;
 import io.lightlink.core.RunnerContext;
 import io.lightlink.facades.SQLFacade;
 import io.lightlink.output.ResponseStream;
@@ -199,12 +198,7 @@ public class SQLHandler {
     private void preparedStatementExecute(String resultSetName, RunnerContext runnerContext, JSObject rowHandler, List<ArgInfo> argInfos, PreparedStatement ps, CallableStatement cs) throws SQLException, IOException {
         // execute
         boolean resultsAvailable;
-        try {
-            AutoStopQuery.getInstance().register(runnerContext, ps);
-            resultsAvailable = ps.execute();
-        } finally {
-            AutoStopQuery.getInstance().unregister(runnerContext, ps);
-        }
+        resultsAvailable = ps.execute();
 
         loadResultSets(resultSetName, runnerContext, ps, resultsAvailable, rowHandler);
 

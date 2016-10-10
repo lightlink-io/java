@@ -23,7 +23,6 @@ package io.lightlink.servlet;
  */
 
 
-import io.lightlink.autostop.AutoStopQuery;
 import io.lightlink.output.JSONHttpResponseStream;
 import io.lightlink.security.CSRFTokensContainer;
 import org.json.simple.parser.JSONParser;
@@ -67,13 +66,7 @@ public class JsProxyServlet extends RestServlet {
 
         JSONHttpResponseStream responseStream = new JSONHttpResponseStream(resp);
 
-        if ("/cancelQueries".equals(actionName)) {
-            int canceled = AutoStopQuery.getInstance().cancelAllForWindow(csrfToken);
-            responseStream.writeProperty("canceledQueries", canceled);
-            responseStream.end();
-        } else {
-            getScriptRunner(req,resp).execute(actionName, "POST", inputParams, responseStream);
-        }
+        getScriptRunner(req, resp).execute(actionName, "POST", inputParams, responseStream);
 
     }
 
