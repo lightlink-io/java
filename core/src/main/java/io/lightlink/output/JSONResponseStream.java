@@ -31,6 +31,8 @@ import io.lightlink.security.AntiXSS;
 import io.lightlink.spring.LightLinkFilter;
 import io.lightlink.types.DateConverter;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.objects.NativeArray;
+import jdk.nashorn.internal.runtime.ScriptObject;
 import org.apache.commons.beanutils.BeanMap;
 
 import javax.xml.bind.DatatypeConverter;
@@ -200,12 +202,32 @@ public class JSONResponseStream implements ResponseStream {
     public synchronized void writeFullObjectToArray(Object value) {
         beginIfNeeded();
 
-        if (value != null && value.getClass().getName().equals("jdk.nashorn.api.scripting.JSObject")) {
+        comma();
+
+        if (value != null && value instanceof jdk.nashorn.internal.runtime.ScriptObject) {
+            ScriptObject so = (ScriptObject) value;
+            if (so.isArray()) {
+                writeArrayStart();
+                int length = ((Number) so.get("length")).intValue();
+                for (int i = 0; i < length; i++) {
+                    writeFullObjectToArray(genericDateConvert(so.get(i)));
+                }
+                writeArrayEnd();
+            } else {
+                writeObjectStart();
+                for (Object key : so.keySet()) {
+                    writeProperty("" + key, genericDateConvert(so.get(key)));
+                }
+                writeObjectEnd();
+            }
+            return;
+
+        } else if (value != null && value instanceof jdk.nashorn.api.scripting.JSObject) {
             JSObject jsObject = (JSObject) value;
             if (jsObject.isArray()) {
-                Object[] array = new Object[((Number) jsObject.getMember("length")).intValue()];
                 writeArrayStart();
-                for (int i = 0; i < array.length; i++) {
+                int length = ((Number) jsObject.getMember("length")).intValue();
+                for (int i = 0; i < length; i++) {
                     writeFullObjectToArray(genericDateConvert(jsObject.getSlot(i)));
                 }
                 writeArrayEnd();
@@ -216,69 +238,71 @@ public class JSONResponseStream implements ResponseStream {
                 }
                 writeObjectEnd();
             }
-        } else {
+            return;
+        } else if (value != null && value instanceof jdk.nashorn.internal.objects.NativeArray) {
+            NativeArray array = (NativeArray) value;
+            value = array.asObjectArray();
+        }
 
-            comma();
 
-            List list = new ArrayList();
-            value = handlePrimitiveArrays(value, list);
-            if (value instanceof Map) {
-                writeObjectStart();
-                Map<Object, Object> map = (Map<Object, Object>) value;
-                if (value instanceof BeanMap) {
-                    for (Map.Entry<Object, Object> entry : map.entrySet()) {
-                        if (!"class".equals(entry.getKey())) {
-                            writeProperty(entry.getKey() + "", entry.getValue());
-                        }
-                    }
-                } else {
-                    for (Map.Entry<Object, Object> entry : map.entrySet()) {
+        List list = new ArrayList();
+        value = handlePrimitiveArrays(value, list);
+        if (value instanceof Map) {
+            writeObjectStart();
+            Map<Object, Object> map = (Map<Object, Object>) value;
+            if (value instanceof BeanMap) {
+                for (Map.Entry<Object, Object> entry : map.entrySet()) {
+                    if (!"class".equals(entry.getKey())) {
                         writeProperty(entry.getKey() + "", entry.getValue());
                     }
                 }
-                writeObjectEnd();
-            } else if (value instanceof List) {
-                writeArrayStart();
-                for (Object o : (List) value) {
-                    writeFullObjectToArray(o);
-                }
-                writePropertyArrayEnd();
-            } else if (value instanceof InputStream) {
-                writeInputStream((InputStream) value);
-            } else if (value instanceof Reader) {
-                writeFromReader((Reader) value);
-            } else if (value instanceof Object[]) {
-                writeArrayStart();
-                for (Object o : (Object[]) value) {
-                    writeFullObjectToArray(o);
-                }
-                writeArrayEnd();
-            } else if (value instanceof Date) {
-                String dateFormat;
-                if (getRunnerContext() != null && getRunnerContext().getTypesFacade().getCustomDatePattern() != null) {
-                    TypesFacade tf = getRunnerContext().getTypesFacade();
-                    dateFormat = tf.getCustomDatePattern();
-                } else
-                    dateFormat = DateConverter.UNIVERSAL_DATE_FORMAT;
-
-                writeString(new SimpleDateFormat(dateFormat).format(value));
-
-            } else if (value == null) {
-
-                writeUnquoted("null");
-
-            } else if (value instanceof Number || value instanceof Boolean) {
-
-                writeUnquoted(value);
-
             } else {
-
-                writeString(value.toString());
-
+                for (Map.Entry<Object, Object> entry : map.entrySet()) {
+                    writeProperty(entry.getKey() + "", entry.getValue());
+                }
             }
+            writeObjectEnd();
+        } else if (value instanceof List) {
+            writeArrayStart();
+            for (Object o : (List) value) {
+                writeFullObjectToArray(o);
+            }
+            writePropertyArrayEnd();
+        } else if (value instanceof InputStream) {
+            writeInputStream((InputStream) value);
+        } else if (value instanceof Reader) {
+            writeFromReader((Reader) value);
+        } else if (value instanceof Object[]) {
+            writeArrayStart();
+            for (Object o : (Object[]) value) {
+                writeFullObjectToArray(o);
+            }
+            writeArrayEnd();
+        } else if (value instanceof Date) {
+            String dateFormat;
+            if (getRunnerContext() != null && getRunnerContext().getTypesFacade().getCustomDatePattern() != null) {
+                TypesFacade tf = getRunnerContext().getTypesFacade();
+                dateFormat = tf.getCustomDatePattern();
+            } else
+                dateFormat = DateConverter.UNIVERSAL_DATE_FORMAT;
 
-            commaNeeded = true;
+            writeString(new SimpleDateFormat(dateFormat).format(value));
+
+        } else if (value == null) {
+
+            writeUnquoted("null");
+
+        } else if (value instanceof Number || value instanceof Boolean) {
+
+            writeUnquoted(value);
+
+        } else {
+
+            writeString(value.toString());
+
         }
+
+        commaNeeded = true;
 
 
     }
