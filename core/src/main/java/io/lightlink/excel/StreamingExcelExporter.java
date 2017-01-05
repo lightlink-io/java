@@ -2,7 +2,7 @@ package io.lightlink.excel;
 
 /*
  * #%L
- * LightLink Core
+ * lightlink-core
  * %%
  * Copyright (C) 2015 - 2016 Vitaliy Shevchuk
  * %%
@@ -27,6 +27,7 @@ import org.apache.commons.beanutils.BeanMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -65,7 +66,7 @@ public class StreamingExcelExporter {
         this.data = data;
     }
 
-    public void doExport(final OutputStream out) throws IOException {
+    public void doExport(OutputStream out) throws IOException {
 
         InputStream templateStream = template.openStream();
         ExcelStreamVisitor visitor = new WritingExcelStreamVisitor(getData(), getExportDateTimeFormat());

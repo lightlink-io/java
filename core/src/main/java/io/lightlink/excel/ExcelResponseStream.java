@@ -23,6 +23,29 @@ package io.lightlink.excel;
  */
 
 
+/*
+ * #%L
+ * lightlink-core
+ * %%
+ * Copyright (C) 2015 - 2016 Vitaliy Shevchuk
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
+
+
 import io.lightlink.config.ConfigManager;
 import io.lightlink.facades.ServletEnv;
 import io.lightlink.output.JSONResponseStream;
@@ -43,7 +66,7 @@ public class ExcelResponseStream extends ObjectBufferResponseStream {
     public static final Logger LOG = LoggerFactory.getLogger(ExcelResponseStream.class);
 
     private ServletEnv env;
-    private String outFileName = "excelExport.xlsx";
+    private String outFileName;
     private String templatePath;
 
     public ExcelResponseStream(String outFileName, String templatePath, ServletEnv env) {
@@ -66,25 +89,39 @@ public class ExcelResponseStream extends ObjectBufferResponseStream {
 
 
     @Override
-    public void end()  {
+    public void end() {
         super.end();
 
         HttpServletResponse response = env.getResponse();
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        String templateLowerCase = templatePath.toLowerCase().trim();
+        if (templateLowerCase.endsWith(".xlam")) {
+            contentType = "application/vnd.ms-excel.addin.macroEnabled.12";
+        } else if (templateLowerCase.endsWith(".xlsm")) {
+            contentType = "application/vnd.ms-excel.sheet.macroEnabled.12";
+        } else if (templateLowerCase.endsWith(".xltm")) {
+            contentType = "application/vnd.ms-excel.template.macroEnabled.12";
+        } else if (templateLowerCase.endsWith(".xltx")) {
+            contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.template";
+        } else if (templateLowerCase.endsWith(".xlsb")) {
+            contentType = "application/vnd.ms-excel.sheet.binary.macroEnabled.12";
+        }
+
+        response.setContentType(contentType);
         response.setHeader("Content-Disposition", "inline; filename=\"" + outFileName + "\"");
 
         URL url = Utils.getUrl(ConfigManager.DEFAULT_ROOT_PACKAGE + "/" + templatePath, env.getRequest().getServletContext());
         Object data = this.getData();
 
-        if (ConfigManager.isInDebugMode()){
+        if (ConfigManager.isInDebugMode()) {
             try {
-                String debugOutput = url.getFile().replaceAll(".xlsx$", ".debug.json");
+                String debugOutput = url.getFile().replaceAll(".xls.$", ".debug.json");
                 FileOutputStream fos = new FileOutputStream(debugOutput);
-                fos.write(("//@ sourceURL="+debugOutput+"\n").getBytes("UTF-8"));
+                fos.write(("//@ sourceURL=" + debugOutput + "\n").getBytes("UTF-8"));
                 JSONResponseStream responseStream = new JSONResponseStream(fos);
                 Map<String, Object> dataMap = getDataMap();
                 for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-                    responseStream.writeProperty(entry.getKey(),entry.getValue());
+                    responseStream.writeProperty(entry.getKey(), entry.getValue());
                 }
                 responseStream.end();
                 fos.close();

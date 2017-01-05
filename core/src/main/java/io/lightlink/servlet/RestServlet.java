@@ -73,7 +73,7 @@ public class RestServlet extends AbstractLightLinkServlet {
         String servletPath = req.getServletPath();
         int pos = req.getRequestURI().indexOf(servletPath);
         String res = req.getRequestURI().substring(pos + servletPath.length());
-        return res.replaceAll("\\.xlsx$", "");
+        return res.replaceAll("\\.xls.$", "");
     }
 
     @Override
