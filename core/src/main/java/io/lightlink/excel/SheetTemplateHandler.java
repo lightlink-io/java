@@ -140,7 +140,7 @@ public class SheetTemplateHandler extends CopyingTemplateHandler implements RowP
                 printElementStart("c", attributes);
 
                 if (cell.getFormula() != null) {
-                    emit("\n<f>" + cell.getFormula() + "</f>");
+                    emit("\n<f><![CDATA[" + cell.getFormula() + "]]></f>");
                 }
 
 
