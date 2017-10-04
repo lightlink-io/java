@@ -23,6 +23,7 @@ package io.lightlink.excel;
  */
 
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -135,6 +136,7 @@ public class CopyingTemplateHandler extends DefaultHandler {
         emit(">");
     }
 
+
     protected void printElementNameAndAttributes(String eName, Map<String, Object> attrs) {
         emit("\n<" + eName);
         for (Map.Entry<String, Object> entry : attrs.entrySet()) {
@@ -146,7 +148,8 @@ public class CopyingTemplateHandler extends DefaultHandler {
     }
 
     protected void echoText() throws SAXException {
-        emit(textBuffer.toString());
+        String text = textBuffer.toString();
+        emit(StringEscapeUtils.escapeXml(text));
         textBuffer.setLength(0);
     }
 }

@@ -52,7 +52,7 @@ public class Utils {
 
     public static String streamToString(InputStream is) throws IOException {
         StringBuilder sb = new StringBuilder();
-        byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[32768];
         int n = 0;
         while (-1 != (n = is.read(buffer))) {
             sb.append(new String(buffer, 0, n));
