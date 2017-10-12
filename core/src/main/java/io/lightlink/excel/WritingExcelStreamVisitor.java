@@ -56,7 +56,6 @@ public class WritingExcelStreamVisitor extends AbstractExcelStreamVisitor {
             Object newValue = getPropertyValue(data, propertyName);
             boolean equals = (oldValue == null && newValue == null || (oldValue != null && oldValue.equals(newValue)));
             boolean addSummary = !firstLine && !equals;
-            System.out.println("addSummary = " + addSummary + " n:" + newValue + " o:" + oldValue);
             oldValue = newValue;
             return addSummary ? rowNode : null;
         }
