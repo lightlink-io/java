@@ -23,6 +23,9 @@ package io.lightlink.excel;
  */
 
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class AbstractExcelStreamVisitor extends ExcelStreamVisitor {
@@ -31,24 +34,37 @@ public abstract class AbstractExcelStreamVisitor extends ExcelStreamVisitor {
     public void visit(RowNode rowNode, RowPrintCallback rowPrintCallback) {
 
 
-        List<CellNode> cells = rowNode.getCells();
-        int size = cells.size();
 
         int rowRepeat = getRowRepeatCount(rowNode);
         for (int r = 0; r < rowRepeat; r++) {
-            nextRow();
-            RowNode cloneRowNode = rowNode.clone();
-            for (int i = 0; i < size; i++) {
-                CellNode cell = cells.get(i);
-                handleCell(cloneRowNode, rowPrintCallback, i, cell);
+            List<RowNode> rowNodes = new ArrayList<RowNode>();
+            rowNodes.addAll(nextRow());
+            rowNodes.add(rowNode);
+            rowNodes.addAll(remainder());
+
+            for (RowNode row : rowNodes) {
+                if (!row.isHidden()) {
+
+                    RowNode cloneRowNode = row.clone();
+                    List<CellNode> cells = cloneRowNode.getCells();
+                    int size = cells.size();
+                    for (int i = 0; i < size; i++) {
+                        CellNode cell = cells.get(i);
+                        handleCell(cloneRowNode, rowPrintCallback, i, cell);
+                    }
+                    rowPrintCallback.printRowNode(cloneRowNode);
+                }
             }
-            rowPrintCallback.printRowNode(cloneRowNode);
         }
+
 
     }
 
-    protected void nextRow() {
+    protected abstract Collection<RowNode> remainder();
+
+    protected List<RowNode> nextRow() {
         // do nothing by default
+        return Collections.EMPTY_LIST;
     }
 
     protected int getRowRepeatCount(RowNode rowNode) {

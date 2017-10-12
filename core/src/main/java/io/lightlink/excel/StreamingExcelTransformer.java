@@ -89,6 +89,8 @@ public class StreamingExcelTransformer {
                 } else if (name.startsWith("xl/worksheets/sheet")) {
                     byte[] bytes = IOUtils.toByteArray(zipIn);
                     sheets.put(name, bytes);
+                } else if (name.equals("xl/calcChain.xml")) {
+                    // skip this file, let excel recreate it
                 } else if (name.equals("xl/workbook.xml")) {
                     zipOut.putNextEntry(new ZipEntry(name));
 
@@ -100,7 +102,6 @@ public class StreamingExcelTransformer {
                     saxParser.parse(new ByteArrayInputStream(bytes), new WorkbookTemplateHandler(writer));
 
                     writer.flush();
-//                    IOUtils.copy(zipIn, zipOut); // todo set <calcPr fullCalcOnLoad="1"/>
                 } else {
                     zipOut.putNextEntry(new ZipEntry(name));
                     IOUtils.copy(zipIn, zipOut);

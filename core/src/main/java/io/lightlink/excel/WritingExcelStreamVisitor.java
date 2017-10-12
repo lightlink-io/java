@@ -38,11 +38,36 @@ public class WritingExcelStreamVisitor extends AbstractExcelStreamVisitor {
 
     public static final Logger LOG = LoggerFactory.getLogger(WritingExcelStreamVisitor.class);
 
+    private class AfterValueChangeListeners {
+        boolean firstLine = true;
+        private Object oldValue;
+        private String propertyName;
+        private RowNode rowNode;
+
+        public AfterValueChangeListeners(String propertyName, RowNode rowNode) {
+            this.propertyName = propertyName;
+            this.rowNode = rowNode;
+        }
+
+        RowNode nextData(Object data) {
+            boolean firstLine = this.firstLine;
+            this.firstLine = false;
+
+            Object newValue = getPropertyValue(data, propertyName);
+            boolean equals = (oldValue == null && newValue == null || (oldValue != null && oldValue.equals(newValue)));
+            boolean addSummary = !firstLine && !equals;
+            System.out.println("addSummary = " + addSummary + " n:" + newValue + " o:" + oldValue);
+            oldValue = newValue;
+            return addSummary ? rowNode : null;
+        }
+    }
+
     private Map<String, Object> data = new HashMap<String, Object>();
     private DateFormat dateFormat;
 
     private Iterator currentRowIterator;
     private String currentRowProperty;
+    private List<AfterValueChangeListeners> afterValueChangeListeners = new ArrayList<AfterValueChangeListeners>();
 
     public WritingExcelStreamVisitor(Map<String, Object> data, DateFormat dateFormat) {
         this.data.putAll(data);
@@ -50,9 +75,33 @@ public class WritingExcelStreamVisitor extends AbstractExcelStreamVisitor {
     }
 
     @Override
-    protected void nextRow() {
-        if (currentRowIterator != null && currentRowIterator.hasNext())
-            data.put(currentRowProperty, currentRowIterator.next());
+    protected List<RowNode> nextRow() {
+        List<RowNode> res = new ArrayList<RowNode>();
+        if (currentRowIterator != null && currentRowIterator.hasNext()) {
+            Object data = currentRowIterator.next();
+            this.data.put(currentRowProperty, data);
+            for (AfterValueChangeListeners afterValueChangeListener : afterValueChangeListeners) {
+                RowNode groupFooterRowNode = afterValueChangeListener.nextData(data);
+                if (groupFooterRowNode != null)
+                    res.add(groupFooterRowNode.clone());
+            }
+        }
+        return res;
+    }
+
+    @Override
+    protected List<RowNode> remainder() {
+        List<RowNode> res = new ArrayList<RowNode>();
+        if (currentRowIterator != null && !currentRowIterator.hasNext()) {
+            for (AfterValueChangeListeners afterValueChangeListener : afterValueChangeListeners) {
+                res.add(afterValueChangeListener.rowNode.clone());
+            }
+
+            afterValueChangeListeners.clear();
+            currentRowIterator = null;
+
+        }
+        return res;
     }
 
     @Override
@@ -60,20 +109,27 @@ public class WritingExcelStreamVisitor extends AbstractExcelStreamVisitor {
         List<CellNode> cells = rowNode.getCells();
 
         if (cells.size() > 0 && cells.get(0).getDecodedValue() != null) {
-            Matcher m = Pattern.compile("^:[a-zA-Z_0-9\\.]+\\[\\]\\.").matcher(cells.get(0).getDecodedValue());
-            if (m.find()) {
-                String s = m.group(0);
-                s = s.substring(1, s.length() - 1);
+            String decodedValue = cells.get(0).getDecodedValue();
+            if (decodedValue.toUpperCase().startsWith(":ON AFTER CHANGE")) {
+                String propertyName = decodedValue.substring(":ON AFTER CHANGE".length()).trim();
+                afterValueChangeListeners.add(new AfterValueChangeListeners(propertyName, rowNode));
+                rowNode.setHidden(true);
+            } else {
+                Matcher m = Pattern.compile("^:[a-zA-Z_0-9\\.]+\\[\\]\\.").matcher(decodedValue);
+                if (m.find()) {
+                    String s = m.group(0);
+                    s = s.substring(1, s.length() - 1);
 
-                Object value = getPropertyValue(data, s.substring(0, s.length() - 2));
-                if (value != null) {
-                    if (value instanceof Object[])
-                        value = Arrays.asList((Object[]) value);
-                    if (value instanceof Collection) {
-                        Collection coll = (Collection) value;
-                        currentRowIterator = coll.iterator();
-                        currentRowProperty = s;
-                        return coll.size();
+                    Object value = getPropertyValue(data, s.substring(0, s.length() - 2));
+                    if (value != null) {
+                        if (value instanceof Object[])
+                            value = Arrays.asList((Object[]) value);
+                        if (value instanceof Collection) {
+                            Collection coll = (Collection) value;
+                            currentRowIterator = coll.iterator();
+                            currentRowProperty = s;
+                            return coll.size();
+                        }
                     }
                 }
             }
@@ -103,9 +159,9 @@ public class WritingExcelStreamVisitor extends AbstractExcelStreamVisitor {
         }
 
         if (value instanceof NativeDate) {
-            value = new Date((long)NativeDate.getTime(value));
+            value = new Date((long) NativeDate.getTime(value));
         }
-        if (value instanceof Date && dateFormat!=null) {
+        if (value instanceof Date && dateFormat != null) {
             value = dateFormat.format((Date) value);
         }
 
@@ -182,11 +238,11 @@ public class WritingExcelStreamVisitor extends AbstractExcelStreamVisitor {
             return ((Map) data).get(property);
 
         int pos = property.indexOf("[].");
-        if (pos!=-1){
-            String containerProperty = property.substring(0,pos+2);
-            String subProperty = property.substring(pos+3);
+        if (pos != -1) {
+            String containerProperty = property.substring(0, pos + 2);
+            String subProperty = property.substring(pos + 3);
             Object containerObj = getPropertyValue(data, containerProperty);
-            return getPropertyValue(containerObj,subProperty);
+            return getPropertyValue(containerObj, subProperty);
         }
 
         try {

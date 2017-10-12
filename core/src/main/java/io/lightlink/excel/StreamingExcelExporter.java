@@ -2,7 +2,7 @@ package io.lightlink.excel;
 
 /*
  * #%L
- * lightlink-core
+ * LightLink Core
  * %%
  * Copyright (C) 2015 - 2016 Vitaliy Shevchuk
  * %%

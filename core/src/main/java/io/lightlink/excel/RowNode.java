@@ -32,6 +32,8 @@ import java.util.Map;
 
 public class RowNode extends AttrNode {
 
+    boolean hidden;
+
     List<CellNode> cells = new ArrayList<CellNode>();
 
     public RowNode(Map<String, Object> attributes) {
@@ -49,6 +51,14 @@ public class RowNode extends AttrNode {
 
     public void setCells(List<CellNode> cells) {
         this.cells = cells;
+    }
+
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 
     public RowNode clone(){
