@@ -545,11 +545,9 @@ public class JSONResponseStream implements ResponseStream {
         if (progressiveBlockSizes != null && progressiveBlockSizes.length != 0) {
             currentRowNum++;
 
-
-            if (progressiveBlockSizes.length <= currentProgressiveBlock) {
-                return;
-            }
-            int currentBlockSize = progressiveBlockSizes[currentProgressiveBlock];
+            int currentBlockSize = currentProgressiveBlock < progressiveBlockSizes.length
+                    ? progressiveBlockSizes[currentProgressiveBlock]
+                    : progressiveBlockSizes[progressiveBlockSizes.length - 1];
 
             if (currentRowNum >= currentBlockSize) {
                 currentProgressiveBlock++;

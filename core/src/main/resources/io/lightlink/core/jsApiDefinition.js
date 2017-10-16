@@ -50,7 +50,7 @@ LL.HintManager = {
     onReadyStateChange: function (xmlhttp, fnName, params, callback, scope, hints) {
         var res;
 
-        if (xmlhttp.readyState === 3 && hints.progressive && hints.partialCount != hints.progressive.length) {
+        if (xmlhttp.readyState === 3 && hints.progressive ) {
             var responseText = xmlhttp.responseText;
 
             var completeJSON = this.completeJSON(responseText, hints);
