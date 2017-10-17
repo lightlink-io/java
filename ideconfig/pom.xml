@@ -20,7 +20,7 @@
     <module>../core</module>
     <module>../test-def</module>
     <module>../war-test</module>
-    <module>../war-spring-rest</module>
+    <!--module>../war-spring-rest</module-->
 
   </modules>
 
