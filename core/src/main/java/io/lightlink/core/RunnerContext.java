@@ -52,7 +52,6 @@ public class RunnerContext {
     /**
      * Identifies the browser window/tab. In order to be able to cancel all running queries for a given window/tab
      */
-    private String csrfToken;
     private io.lightlink.facades.SQLFacade SQLFacade;
     private SQLFacade rootSQLFacade;
 
@@ -64,14 +63,6 @@ public class RunnerContext {
         typesFacade = new TypesFacade(this);
         responseFacade = new ResponseFacade(this);
         initializeScriptingObjects((Compilable) scriptEngine);
-    }
-
-    public String getCsrfToken() {
-        return csrfToken;
-    }
-
-    public void setCsrfToken(String csrfToken) {
-        this.csrfToken = csrfToken;
     }
 
     protected void initializeScriptingObjects(Compilable scriptEngine) {

@@ -39,14 +39,14 @@ public class JsonStreamTestPerf extends TestCase{
 
         LightLinkFilter.setThreadLocalStreamingData(new StreamingResponseData(null,null));
 
-        bufferResponseStream = new JSONResponseStream(new NullOutputStream());
+        bufferResponseStream = new JSONResponseStream(new NullOutputStream(),null);
         bufferResponseStream.writePropertyArrayStart("resultSet");
 
         for (int i=0;i<100000;i++) {
             bufferResponseStream.writeFullObjectToArray(map);
         }
 
-        bufferResponseStream = new JSONResponseStream(new NullOutputStream());
+        bufferResponseStream = new JSONResponseStream(new NullOutputStream(),null);
         bufferResponseStream.writePropertyArrayStart("resultSet");
 
         long l = System.currentTimeMillis();
@@ -58,7 +58,7 @@ public class JsonStreamTestPerf extends TestCase{
         System.out.println( "time prd:"+       ( System.currentTimeMillis()-l)/1000F);
 
         System.setProperty("lightlink.debug","true");
-        bufferResponseStream = new JSONResponseStream(new NullOutputStream());
+        bufferResponseStream = new JSONResponseStream(new NullOutputStream(),null);
         bufferResponseStream.writePropertyArrayStart("resultSet");
 
 

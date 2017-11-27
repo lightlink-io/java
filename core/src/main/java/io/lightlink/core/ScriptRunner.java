@@ -30,7 +30,6 @@ import io.lightlink.facades.SQLFacade;
 import io.lightlink.facades.ServletEnv;
 import io.lightlink.facades.TxFacade;
 import io.lightlink.output.ResponseStream;
-import io.lightlink.security.CSRFTokensContainer;
 import io.lightlink.translator.ScriptTranslator;
 import io.lightlink.utils.LogUtils;
 import io.lightlink.utils.Utils;
@@ -92,8 +91,6 @@ public class ScriptRunner {
         ScriptContext context = engine.getContext();
 
         RunnerContext runnerContext = new RunnerContext(responseStream, engine);
-
-        runnerContext.setCsrfToken(CSRFTokensContainer.getToken(inputParams));
 
         ResponseFacade responseFacade = runnerContext.getResponseFacade();
 

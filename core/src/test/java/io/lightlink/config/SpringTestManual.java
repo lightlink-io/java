@@ -70,7 +70,7 @@ public class SpringTestManual extends TestCase {
 
         new oracle.jdbc.OracleDriver();
         SingleConnectionDataSource dataSource =
-                new SingleConnectionDataSource("jdbc:oracle:thin:@127.0.0.1:1521/XE", "system", "password", false);
+                new SingleConnectionDataSource("jdbc:oracle:thin:@127.0.0.1:1521/XE", "hr", "lightlink", false);
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
 //        String sql = "select e.* from hr.EMPLOYEES e";
@@ -80,7 +80,7 @@ public class SpringTestManual extends TestCase {
 
         long l = System.currentTimeMillis();
         dataSource =
-                new SingleConnectionDataSource("jdbc:oracle:thin:@127.0.0.1:1521/XE", "system", "password", false);
+                new SingleConnectionDataSource("jdbc:oracle:thin:@127.0.0.1:1521/XE", "system", "lightlink", false);
         jdbcTemplate = new JdbcTemplate(dataSource);
 
         res = jdbcTemplate.query(sql, BeanPropertyRowMapper.newInstance(Employee.class));

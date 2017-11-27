@@ -42,24 +42,10 @@ public class ProgressiveLoadTest extends TestCase {
 
     public void test() throws IOException, ParseException {
 
-
-        HttpServletRequest servletRequestMock = (HttpServletRequest) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{HttpServletRequest.class}, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                if (args[0].equals("lightlink-progressive"))
-                    return "100, 1000, 5000";
-                else
-                    return null;
-            }
-        });
-
-        LightLinkFilter.
-                setThreadLocalStreamingData(new StreamingResponseData(servletRequestMock, null));
-
-        JSONStringBufferResponseStream bufferResponseStream = new JSONStringBufferResponseStream();
+        JSONStringBufferResponseStream bufferResponseStream = new JSONStringBufferResponseStream(new int[]{100,1000,5000});
 
         bufferResponseStream.writePropertyArrayStart("resultSet");
-        for (int i = 0; i < 11500; i++) {
+        for (int i = 0; i < 11501; i++) {
             HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("value1", Math.random());
             map.put("value2", Math.random());
@@ -84,7 +70,7 @@ public class ProgressiveLoadTest extends TestCase {
 
         Map res = (Map) new JSONParser().parse(responseText);
         Collection resultSet = (Collection) res.get("resultSet");
-        assertEquals(resultSet.size(), 6100);
+        assertEquals(11100,resultSet.size() );
 
     }
 }

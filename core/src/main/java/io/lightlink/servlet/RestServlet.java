@@ -24,7 +24,6 @@ package io.lightlink.servlet;
 
 
 import io.lightlink.output.JSONHttpResponseStream;
-import io.lightlink.security.CSRFTokensContainer;
 import io.lightlink.spring.LightLinkFilter;
 import io.lightlink.spring.StreamingResponseData;
 import io.lightlink.utils.Utils;
@@ -54,7 +53,7 @@ public class RestServlet extends AbstractLightLinkServlet {
         if (Utils.isFirstNonAlphabetic(actionName))
             return; // resources with non-alpha first char considered private/library and not available for calling
 
-        getScriptRunner(req, resp).execute(actionName, method, inputParams, new JSONHttpResponseStream(resp));
+        getScriptRunner(req, resp).execute(actionName, method, inputParams, new JSONHttpResponseStream(resp, null));
     }
 
     protected Map<String, Object> getParams(HttpServletRequest req) throws IOException {
@@ -98,27 +97,12 @@ public class RestServlet extends AbstractLightLinkServlet {
 
     protected void service(String method, HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-        LightLinkFilter.setThreadLocalStreamingData(new StreamingResponseData(req, resp));
+        LightLinkFilter.setThreadLocalStreamingData(new StreamingResponseData(req,resp));
 
         Map<String, Object> params = getParams(req);
-        boolean safe = noCSRF || csrfCheck(req, resp, params);
-        if (safe) {
-            resp.setContentType("application/json; charset=UTF-8");
-            doServide(method, req, resp, params);
-        }
-    }
 
-    protected boolean csrfCheck(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> params) throws IOException {
-
-        CSRFTokensContainer tokensContainer = CSRFTokensContainer.getInstance(req.getSession());
-        String token = tokensContainer.validate(params);
-
-        if (token == null) {
-            tokensContainer.sendCsrfError(resp);
-            return false;
-        } else {
-            return true;
-        }
+        resp.setContentType("application/json; charset=UTF-8");
+        doServide(method, req, resp, params);
     }
 
 

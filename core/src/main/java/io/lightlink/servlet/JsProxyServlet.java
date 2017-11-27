@@ -24,7 +24,6 @@ package io.lightlink.servlet;
 
 
 import io.lightlink.output.JSONHttpResponseStream;
-import io.lightlink.security.CSRFTokensContainer;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -33,21 +32,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class JsProxyServlet extends RestServlet {
 
-    protected void service(String method, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
-        if ("/csrfTokenRenew".equals(getActionName(req))) {
-            // renew csrf token before checking if the existing one, because it's invalid anyway
-            JSONHttpResponseStream responseStream = new JSONHttpResponseStream(resp);
-            responseStream.writeProperty("newToken", CSRFTokensContainer.getInstance(req.getSession()).createNewToken());
-            responseStream.end();
-        } else {
-            super.service(method, req, resp);
-        }
-    }
 
     private String getActionName(HttpServletRequest req) {
         String servletPath = req.getServletPath();
@@ -59,15 +50,30 @@ public class JsProxyServlet extends RestServlet {
     protected void doServide(String method, HttpServletRequest req, HttpServletResponse resp, Map<String, Object> inputParams) throws IOException {
 
 
-        String csrfToken = CSRFTokensContainer.getToken(inputParams);
-
-
         String actionName = getActionName(req);
 
-        JSONHttpResponseStream responseStream = new JSONHttpResponseStream(resp);
+        Object progressiveParams = inputParams.get("$lightlink-progressive");
+        int[] progressiveBlockSizes = getProgressiveBlockSizes(progressiveParams);
+
+        JSONHttpResponseStream responseStream = new JSONHttpResponseStream(resp, progressiveBlockSizes);
 
         getScriptRunner(req, resp).execute(actionName, "POST", inputParams, responseStream);
 
+    }
+
+    private int[] getProgressiveBlockSizes(Object progressiveParams) {
+        int[]progressiveBlockSizes=null;
+        if (progressiveParams instanceof List){
+            List pp = (List) progressiveParams;
+            progressiveBlockSizes = new int[pp.size()];
+            for (int i = 0; i < pp.size(); i++) {
+                progressiveBlockSizes[i] = ((Number) pp.get(i)).intValue();
+            }
+        } else if ("true".equals(progressiveParams)
+                ||progressiveParams instanceof Boolean && ((Boolean) progressiveParams).booleanValue()){
+            progressiveBlockSizes = new int[]{100,100,100,100,100,1000};
+        }
+        return progressiveBlockSizes;
     }
 
     @Override

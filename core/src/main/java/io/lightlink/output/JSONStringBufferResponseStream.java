@@ -29,7 +29,10 @@ import java.io.IOException;
 public class JSONStringBufferResponseStream extends JSONResponseStream {
 
     public JSONStringBufferResponseStream() {
-        super(new ByteArrayOutputStream());
+        super(new ByteArrayOutputStream(),null);
+    }
+    public JSONStringBufferResponseStream(int[] progressiveBlockSizes) {
+        super(new ByteArrayOutputStream(),progressiveBlockSizes);
     }
 
 

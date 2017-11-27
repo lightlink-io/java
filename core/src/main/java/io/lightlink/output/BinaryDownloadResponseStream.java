@@ -34,7 +34,7 @@ public class BinaryDownloadResponseStream extends JSONHttpResponseStream {
 
     public BinaryDownloadResponseStream(HttpServletResponse response) throws IOException {
         // avoid calling response.getWriter while response.getOutputStream() might be needed for binary data
-        super(null);
+        super(null,null);
     }
 
 

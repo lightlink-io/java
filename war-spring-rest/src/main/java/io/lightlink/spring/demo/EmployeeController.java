@@ -4,13 +4,10 @@ package io.lightlink.spring.demo;
 import io.lightlink.output.ResponseStream;
 import io.lightlink.spring.LightLinkFilter;
 import io.lightlink.spring.StreamingMapper;
-import io.lightlink.sql.SQLHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.sql.DataSource;
@@ -42,7 +39,7 @@ public class EmployeeController {
     @RequestMapping("/employeesStreamWithMapping")
     public void getPersonDetailAsStream() {
 
-        ResponseStream responseStream = LightLinkFilter.getCurrentResponseStream();
+        ResponseStream responseStream = LightLinkFilter.initResponseStream(new int[]{500});
         responseStream.writePropertyArrayStart("resultSet");  // write opening JSON array declaration : "resultSet":[
 
         jdbcTemplate.query(getSQL(), new StreamingMapper(responseStream, BeanPropertyRowMapper.newInstance(Employee.class)));
@@ -61,7 +58,7 @@ public class EmployeeController {
 
             ResultSet rs = connection.createStatement().executeQuery(getSQL());
 
-            ResponseStream responseStream = LightLinkFilter.getCurrentResponseStream();
+            ResponseStream responseStream = LightLinkFilter.initResponseStream(new int[]{500});
             responseStream.writePropertyArrayStart("resultSet");// write opening JSON array declaration : "resultSet":[
 
             while(rs.next()){
@@ -87,7 +84,7 @@ public class EmployeeController {
     @RequestMapping("/employeesStreamWithoutMapping")
     public void getPersonDetailAsStreamWithoutMapping() {
 
-        ResponseStream responseStream = LightLinkFilter.getCurrentResponseStream();
+        ResponseStream responseStream = LightLinkFilter.initResponseStream(new int[]{500});
         responseStream.writePropertyArrayStart("resultSet");  // write opening JSON array declaration : "resultSet":[
 
         jdbcTemplate.query(getSQL(), new StreamingMapper(responseStream));

@@ -1,5 +1,5 @@
 {
-  call TEST_TYPES(
+  call HR.TEST_TYPES(
    :(oStructArr.PERSON_ARRAY)p.personsIn ,
    :(out)(oStructArr.PERSON_ARRAY)personsOut ,
    :(oArr.MY_INT_ARRAY)p.inArr ,

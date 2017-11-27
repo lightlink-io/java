@@ -24,11 +24,8 @@ package io.lightlink.output;
 
 
 import io.lightlink.config.ConfigManager;
-import io.lightlink.core.Hints;
 import io.lightlink.core.RunnerContext;
 import io.lightlink.facades.TypesFacade;
-import io.lightlink.security.AntiXSS;
-import io.lightlink.spring.LightLinkFilter;
 import io.lightlink.types.DateConverter;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.objects.NativeArray;
@@ -78,31 +75,19 @@ public class JSONResponseStream implements ResponseStream {
     private int currentRowNum;
     private int openBracesCount;
 
-    private boolean antiXSS;
     private OutputStream outputStream;
     private char rootTagOpen = '{';
     private char rootTagClose = '}';
 
-    public JSONResponseStream(OutputStream outputStream) {
+    public JSONResponseStream(OutputStream outputStream,int[] progressiveBlockSizes) {
+        this.progressiveBlockSizes = progressiveBlockSizes;
         this.outputStream = outputStream;
         commaNeeded = false;
         ident = 0;
         ended = false;
         started = false;
-
-        initHints();
-
     }
 
-    protected void initHints() {
-        if (LightLinkFilter.isThreadLocalStreamingDataSet()) {
-            Hints hints = LightLinkFilter.getThreadLocalStreamingData().getHints();
-            if (hints != null) {
-                progressiveBlockSizes = hints.getProgressiveBlockSizes();
-                antiXSS = hints.isAntiXSS();
-            }
-        }
-    }
 
     protected OutputStream getOutputStream() {
         return outputStream;
@@ -361,9 +346,6 @@ public class JSONResponseStream implements ResponseStream {
     }
 
     public void writeString(String valueStr) {
-        if (antiXSS)
-            valueStr = AntiXSS.escape(valueStr);
-
         write('\"');
         writeEscapedString(valueStr);
         write('\"');

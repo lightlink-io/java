@@ -1,6 +1,6 @@
 
 
-sql.setConnection("oracle.jdbc.OracleDriver","jdbc:oracle:thin:@tiths110.fr.net.intra:1521/ARCWDD01","DBRIDGE","DBRIDGE");
+sql.setConnection("oracle.jdbc.OracleDriver","jdbc:oracle:thin:@127.0.0.1:1521/XE","HR","lightlink");
 sql.getConnection().setAutoCommit(false);
 
 

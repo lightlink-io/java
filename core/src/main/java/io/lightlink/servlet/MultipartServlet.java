@@ -39,7 +39,7 @@ public class MultipartServlet extends RestServlet {
 
         String actionName = getAction(req);
 
-        getScriptRunner(req, resp).execute(actionName, method, inputParams, new JSONHttpResponseStream(resp));
+        getScriptRunner(req, resp).execute(actionName, method, inputParams, new JSONHttpResponseStream(resp,null));
     }
 
     protected Map<String, Object> getParams(HttpServletRequest req) throws IOException {

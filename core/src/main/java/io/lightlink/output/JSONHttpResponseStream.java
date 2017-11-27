@@ -30,18 +30,18 @@ public class JSONHttpResponseStream extends JSONResponseStream implements HttpRe
 
     protected HttpServletResponse response;
 
-    public static JSONHttpResponseStream getInstance(HttpServletResponse response) {
+    public static JSONHttpResponseStream getInstance(HttpServletResponse response,int[] progressiveBlockSizes) {
         try {
-            return new JSONHttpResponseStream(response);
+            return new JSONHttpResponseStream(response,  progressiveBlockSizes);
         } catch (IOException e) {
             throw new RuntimeException(e.toString(),e);
         }
     }
 
 
-    public JSONHttpResponseStream(HttpServletResponse response) throws IOException {
+    public JSONHttpResponseStream(HttpServletResponse response,int[] progressiveBlockSizes) throws IOException {
 
-        super(response.getOutputStream());
+        super(response.getOutputStream(),progressiveBlockSizes);
 
         this.response = response;
     }

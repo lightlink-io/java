@@ -106,8 +106,8 @@ public class LightLinkFilter implements Filter {
 
     }
 
-    public static ResponseStream getCurrentResponseStream() {
-        return threadLocalInstance.get().getResponseStream();
+    public static ResponseStream initResponseStream(int[] progressiveBlockSizes) {
+        return threadLocalInstance.get().initResponseStream(progressiveBlockSizes);
     }
 
 

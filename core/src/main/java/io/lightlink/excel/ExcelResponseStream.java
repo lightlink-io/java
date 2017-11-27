@@ -101,7 +101,7 @@ public class ExcelResponseStream extends ObjectBufferResponseStream {
                 String debugOutput = url.getFile().replaceAll(".xls.$", ".debug.json");
                 FileOutputStream fos = new FileOutputStream(debugOutput);
                 fos.write(("//@ sourceURL=" + debugOutput + "\n").getBytes("UTF-8"));
-                JSONResponseStream responseStream = new JSONResponseStream(fos);
+                JSONResponseStream responseStream = new JSONResponseStream(fos, null);
                 Map<String, Object> dataMap = getDataMap();
                 for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
                     responseStream.writeProperty(entry.getKey(), entry.getValue());
