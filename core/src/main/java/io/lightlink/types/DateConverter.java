@@ -45,11 +45,11 @@ public class DateConverter extends AbstractConverter {
             {"^\\d\\d\\d\\d-\\d\\d-\\d\\d$", "yyyy-MM-dd"},
             {"^\\d\\d\\d\\d-\\d\\d-\\d\\d\\ \\d\\d:\\d\\d$", "yyyy-MM-dd HH:mm"},
             {"^\\d\\d\\d\\d-\\d\\d-\\d\\d\\ \\d\\d:\\d\\d:\\d\\d$", "yyyy-MM-dd HH:mm:ss"},
-            
+
             {"^\\d\\d\\d\\d/\\d\\d/\\d\\d$", "yyyy/MM/dd"},
             {"^\\d\\d\\d\\d/\\d\\d/\\d\\d\\ \\d\\d:\\d\\d$", "yyyy/MM/dd HH:mm"},
             {"^\\d\\d\\d\\d/\\d\\d/\\d\\d\\ \\d\\d:\\d\\d:\\d\\d$", "yyyy/MM/dd HH:mm:ss"},
-            
+
             {"^\\d\\d\\d\\d\\d\\d\\d\\d$", "yyyyMMdd"},
             {"^\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d$", "yyyyMMddHHmmss"},
 
@@ -61,14 +61,16 @@ public class DateConverter extends AbstractConverter {
         return instance;
     }
 
+    private String explicitPattern;
+
     @Override
     public Object convertToJdbc(Connection connection, RunnerContext runnerContext, String name, Object value) {
-        if (value == null || (value instanceof String && ((String) value).trim().length()==0))
+        if (value == null || (value instanceof String && ((String) value).trim().length() == 0))
             return null;
-        else if (value instanceof ScriptObjectMirror && ((ScriptObjectMirror)value ).getClassName().equals("Date")){
+        else if (value instanceof ScriptObjectMirror && ((ScriptObjectMirror) value).getClassName().equals("Date")) {
             Number time = (Number) ((ScriptObjectMirror) value).callMember("getTime");
             return new java.sql.Date(time.longValue());
-        }else
+        } else
             return tryToConvertToDate(runnerContext.getTypesFacade(), name, value);
     }
 
@@ -80,6 +82,14 @@ public class DateConverter extends AbstractConverter {
 
         String vStr = v.toString();
 
+        if (explicitPattern != null) {
+            try {
+                return new Timestamp(new SimpleDateFormat(explicitPattern).parse(vStr).getTime());
+            } catch (ParseException e) {
+                throw new IllegalArgumentException("Cannot parse as date the value:" + vStr + " with given format:" + explicitPattern + " for field:" + name);
+            }
+        }
+
         String customPattern = typesFacade.getCustomDatePattern();
         if (customPattern != null) {
             try {
@@ -88,6 +98,7 @@ public class DateConverter extends AbstractConverter {
                 /*try generic formats */
             }
         }
+
         Timestamp d = null;
         try {
             for (String[] pattern : DATE_PATTERNS) {
@@ -101,13 +112,17 @@ public class DateConverter extends AbstractConverter {
         if (d == null) {
             throw new IllegalArgumentException("Cannot parse as date the value:" + v + " field:" + name);
         }
+
         return d;
     }
 
     public Object convertFromJdbc(Object value) {
-        if (value != null && value instanceof Date)
-            return new Date(((Date) value).getTime());
-        else
+        if (value != null && value instanceof Date) {
+            if (explicitPattern != null)
+                return new SimpleDateFormat(explicitPattern).format(((Date) value).getTime());
+            else
+                return new Date(((Date) value).getTime());
+        } else
             return value;
     }
 
@@ -128,4 +143,8 @@ public class DateConverter extends AbstractConverter {
         return Types.TIMESTAMP;
     }
 
+    @Override
+    public void setConfig(String config) {
+        this.explicitPattern = config;
+    }
 }

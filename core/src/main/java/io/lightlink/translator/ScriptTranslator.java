@@ -42,8 +42,8 @@ public class ScriptTranslator {
                 || c == '_'
                 || c == '-'  //tolerate "-" as binding part for UTF-8 blob encoding option
                 || c == '['
-                || (c == ']' && unclosed(s, '(', ')'))
-                || (c == ')' && unclosed(s, '(', ')'));
+                || c == ']'
+                || unclosed(s, '(', ')');
     }
 
     private static boolean unclosed(String s, char openChar, char closeChar) {
@@ -55,7 +55,7 @@ public class ScriptTranslator {
         return score > 0;
     }
 
-    public String translate(String scriptName, URL url, String content) throws IOException {
+    public String translate(String content) throws IOException {
         String lines[] = content.split("\\r?\\n");
         StringBuilder res = new StringBuilder();
 

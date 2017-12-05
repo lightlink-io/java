@@ -112,7 +112,9 @@ public class LightLinkFilter implements Filter {
 
 
     private void reportError(StreamingResponseData responseData, Throwable e) {
-        ResponseStream stream = responseData.getResponseStream();
+        ResponseStream stream = responseData.isResponseStreamInitiated()?
+                responseData.getResponseStream():
+                responseData.initResponseStream(null);
 
         stream.writeProperty("success", false);
         if (e != null) {

@@ -168,7 +168,7 @@ public class ConfigManager {
 
         content = processInclude(scriptName, content, translationNeeded);
         if (translationNeeded)
-            content = translator.translate(scriptName, url, content);
+            content = translator.translate(content);
 
         return content;
     }

@@ -483,7 +483,7 @@ public class SQLHandler {
                 converter = JSONConverter.getInstance();
             else if (directive.equalsIgnoreCase("number") || directive.equalsIgnoreCase("numeric"))
                 converter = NumberConverter.getInstance();
-            else if (directive.equalsIgnoreCase("date"))
+            else if (directiveLower.startsWith("date"))
                 converter = DateConverter.getInstance();
             else
                 converter = runnerContext.getTypesFacade().getCustomConverter(parts[0]);
