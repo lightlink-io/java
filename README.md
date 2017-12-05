@@ -1,7 +1,3 @@
-# LightLink.io
-
-See: http://lightlink.io/
-
 # Main concepts
 LightLink is a server-side java framework to create data oriented REST/JSON services with a **MINIMUM** code.
 
@@ -10,6 +6,35 @@ It runs in the JVM (Java Virtual Machine) on the application server. Allows to p
 ### Streaming
 LightLink **STREAMS** data from the Database to WEB2.0 client, allowing the Web client to show the first page of resultset immediately, no need to wait for the whole resultSet to be loaded.
 See lightlink NPM package for API : https://github.com/lightlink-io/npm
+
+## Installation
+
+pom.xml:
+```xml
+        <dependency>
+            <groupId>io.lightlink</groupId>
+            <artifactId>lightlink-core</artifactId>
+            <version>1.2</version>  <!-- at the moment of writing -->
+        </dependency>
+```
+
+/src/main/webapp/WEB-INF/web.xml:
+```xml
+    <servlet>
+        <servlet-name>JsProxyServlet</servlet-name>
+        <servlet-class>io.lightlink.servlet.JsProxyServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>JsProxyServlet</servlet-name>
+        <url-pattern>/lightlink/*</url-pattern>
+    </servlet-mapping>
+```
+/src/main/webapp/WEB-INF/lightlink/config.js:
+```js
+sql.setDataSourceJndi("java:comp/env/jdbc/MainDS"); // assuming that you have jdbc/MainDS configured in you app server
+//or, only for DEV: sql.setConnection("my.jdbc.driver.class.name","my.jdbc.url","login","password"); 
+```
 
 ## First step
 
