@@ -1,7 +1,7 @@
 # Main concepts
 LightLink is a server-side java framework to create data oriented REST/JSON services with a **MINIMUM** code.
 
-It runs in the JVM (Java Virtual Machine) on the application server. Allows to program REST services in JavaScript (executed by Nashorn JavaScript engine of JVM). Of course Java classes can be called from JavaScript if necesary. It's also common to integrate with frameworks like Spring, etc..
+It runs in the JVM (Java Virtual Machine) on the application server. Allows to program REST services in JavaScript (executed by Nashorn JavaScript engine of JVM). Of course Java classes can be called from JavaScript if necesary. It's also common to integrate lightlink with frameworks like Spring, etc..
 
 ### Streaming
 LightLink **STREAMS** data from the Database to WEB2.0 client, allowing the Web client to show the first page of resultset immediately, no need to wait for the whole resultSet to be loaded.
@@ -219,8 +219,8 @@ Build-in casings are:
 - date.FORMAT) – String to java.sql.Timestamp conversion: See https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html for possible FORMAT letters
 - (blob) – BLOB represented by a byte array. Rarely used because of its verbosity, blob.base64 is more efficient.
 - (blob.base64) – BLOB represented as base64 encoded String
-- (blob. UTF-8) – BLOB represented as UTF-8 encoded String
-- (array) - Native DB Array type. Uses generic JDBC API to suport DB Array types. Example : PostgreSQL's array types
+- (blob.<string-encoding>) – BLOB represented as a string encoded with <string-encoding> (UTF-8, iso-8859-1,etc)
+- (array.<db-type>) - Native DB Array type. Uses generic JDBC API to suport DB Array types. Example : PostgreSQL's array types where <db-type> can be varchar, integer, etc
 - (json) –  JSON data type. Mapped to a native JSON type if supported by RDBMS (PostgreSQL, Oracle,.. ) otherwise can be mapped to a BLOB, TEXT or VARCHAR. 
 - (oArr)             – Oracle ARRAY of primitives, VARCHAR2 ou NUMBER
 - (oStruct)         – Oracle STRUCT
