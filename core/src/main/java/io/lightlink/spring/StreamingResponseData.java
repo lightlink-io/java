@@ -51,25 +51,30 @@ public class StreamingResponseData {
     public StreamingResponseData(HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
         this.servletRequest = servletRequest;
         this.servletResponse = servletResponse;
-
-
     }
+
 
     public boolean isResponseStreamInitiated() {
         return responseStream != null;
     }
 
+    public void setResponseStream(HttpResponseStream responseStream) {
+        this.responseStream = responseStream;
+    }
+
     public HttpResponseStream initResponseStream(int[] progressiveBlockSizes) {
-        try {
-            runnable = new AsyncHttpResponseStreamRunnable(
-                    new JSONHttpResponseStream(servletResponse, progressiveBlockSizes));
+        this.progressiveSlices = progressiveSlices;
+        if (responseStream == null)
+            try {
+                runnable = new AsyncHttpResponseStreamRunnable(
+                        new JSONHttpResponseStream(servletResponse, progressiveBlockSizes));
 
-            taskFuture = executorService.submit(runnable);
+                taskFuture = executorService.submit(runnable);
 
-            responseStream = runnable.getFacade();
-        } catch (IOException e) {
-            throw new RuntimeException(e.toString(), e);
-        }
+                responseStream = runnable.getFacade();
+            } catch (IOException e) {
+                throw new RuntimeException(e.toString(), e);
+            }
         return responseStream;
     }
 
@@ -103,7 +108,5 @@ public class StreamingResponseData {
         }
     }
 
-    public HttpServletRequest getServletRequest() {
-        return servletRequest;
-    }
+
 }

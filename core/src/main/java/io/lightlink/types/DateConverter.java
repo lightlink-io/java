@@ -55,10 +55,8 @@ public class DateConverter extends AbstractConverter {
 
     };
 
-    public static final DateConverter instance = new DateConverter();
-
     public static DateConverter getInstance() {
-        return instance;
+        return new DateConverter();
     }
 
     private String explicitPattern;
