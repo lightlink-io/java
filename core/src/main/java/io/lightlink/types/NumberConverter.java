@@ -48,7 +48,7 @@ public class NumberConverter extends AbstractConverter {
                 return new BigDecimal(value.toString());
 
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Cannot convert field:"+name+" value :"+value+" to numeric");
+            throw new IllegalArgumentException("Cannot convert field:" + name + " value :" + value + " to numeric");
         }
     }
 

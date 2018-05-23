@@ -87,7 +87,7 @@ public class BlobConverter extends AbstractConverter {
     public Object readFromResultSet(ResultSet resultSet, int pos, RunnerContext runnerContext, String colName) throws SQLException, IOException {
 
         InputStream stream = resultSet.getBinaryStream(pos);
-        return inputStreamToReturnValue(stream);
+        return stream == null ? null : inputStreamToReturnValue(stream);
 
     }
 
@@ -95,7 +95,7 @@ public class BlobConverter extends AbstractConverter {
     public Object readFromCallableStatement(CallableStatement cs, int pos, RunnerContext runnerContext, String colName) throws SQLException, IOException {
 
         InputStream stream = cs.getBlob(pos).getBinaryStream();
-        return inputStreamToReturnValue(stream);
+        return stream == null ? null : inputStreamToReturnValue(stream);
 
     }
 

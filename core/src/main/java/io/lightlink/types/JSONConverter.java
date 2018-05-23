@@ -35,7 +35,7 @@ import java.sql.SQLException;
 
 public class JSONConverter extends AbstractConverter {
 
-    static JSONConverter instance  = new JSONConverter();
+    static JSONConverter instance = new JSONConverter();
 
     public static JSONConverter getInstance() {
         return instance;
@@ -48,11 +48,11 @@ public class JSONConverter extends AbstractConverter {
     @Override
     public Object convertToJdbc(Connection connection, RunnerContext runnerContext, String name, Object value) throws IOException, SQLException {
 
-        if (value==null)
+        if (value == null)
             return null;
 
         String dbProduct = connection.getMetaData().getDatabaseProductName();
-        if ("PostgreSQL".equalsIgnoreCase(dbProduct)){
+        if ("PostgreSQL".equalsIgnoreCase(dbProduct)) {
             PGobject jsonObject = new PGobject();
             jsonObject.setType("json");
             jsonObject.setValue(value.toString());
@@ -65,13 +65,13 @@ public class JSONConverter extends AbstractConverter {
     @Override
     public Object readFromResultSet(ResultSet resultSet, int pos, RunnerContext runnerContext, String colName) throws SQLException, IOException {
         String string = resultSet.getString(pos);
-        return string==null?null:JSONValue.parse(string);
+        return string == null ? null : JSONValue.parse(string);
     }
 
     @Override
     public Object readFromCallableStatement(CallableStatement cs, int pos, RunnerContext runnerContext, String colName) throws SQLException, IOException {
         String string = cs.getString(pos);
-        return string==null?null:JSONValue.parse(string);
+        return string == null ? null : JSONValue.parse(string);
     }
 
     @Override

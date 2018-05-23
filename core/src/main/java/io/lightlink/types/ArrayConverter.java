@@ -64,12 +64,14 @@ public class ArrayConverter extends AbstractConverter {
 
     @Override
     public Object readFromResultSet(ResultSet resultSet, int pos, RunnerContext runnerContext, String colName) throws SQLException, IOException {
-        return resultSet.getArray(pos).getArray();
+        Array array = resultSet.getArray(pos);
+        return array == null ? null : array.getArray();
     }
 
     @Override
     public Object readFromCallableStatement(CallableStatement cs, int pos, RunnerContext runnerContext, String colName) throws SQLException, IOException {
-        return cs.getArray(pos).getArray();
+        Array array = cs.getArray(pos);
+        return array == null ? null : array.getArray();
     }
 
     @Override

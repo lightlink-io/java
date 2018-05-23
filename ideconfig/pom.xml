@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.lightlink</groupId>
   <artifactId>ideconfig</artifactId>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
   <packaging>pom</packaging>
 
   <licenses>
@@ -19,7 +19,7 @@
     <module>../globals</module>
     <module>../core</module>
     <module>../test-def</module>
-    <module>../war-test</module>
+    <!--module>../war-test</module-->
     <!--module>../war-spring-rest</module-->
 
   </modules>
