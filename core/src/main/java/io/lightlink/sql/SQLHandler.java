@@ -197,13 +197,17 @@ public class SQLHandler {
 
     private void preparedStatementExecute(String resultSetName, RunnerContext runnerContext, JSObject rowHandler, List<ArgInfo> argInfos, PreparedStatement ps, CallableStatement cs) throws SQLException, IOException {
         // execute
-        boolean resultsAvailable;
-        resultsAvailable = ps.execute();
+        try {
+            boolean resultsAvailable;
+            resultsAvailable = ps.execute();
 
-        loadResultSets(resultSetName, runnerContext, ps, resultsAvailable, rowHandler);
+            loadResultSets(resultSetName, runnerContext, ps, resultsAvailable, rowHandler);
 
-        if (cs != null) // if out params present
-            loadOutData(argInfos, runnerContext, cs, rowHandler);
+            if (cs != null) // if out params present
+                loadOutData(argInfos, runnerContext, cs, rowHandler);
+        } finally {
+            ps.close();
+        }
     }
 
     private void loadResultSets(String resultSetName, RunnerContext runnerContext, PreparedStatement ps, boolean resultsAvailable, JSObject rowHandler) throws SQLException, IOException {

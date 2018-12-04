@@ -186,6 +186,18 @@ public class SQLFacade {
 
     }
 
+
+    public void setDataSource(DataSource dataSource) {
+        if (connection != null) {
+            releaseConnection();
+        }
+        if (dataSource == null) {
+            throw new RuntimeException("DataSource passed to setDataSource is null");
+        }
+        this.dataSource = dataSource;
+
+    }
+
     public int getFetchSize() {
         return fetchSize;
     }
